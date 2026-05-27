@@ -153,6 +153,17 @@ function GuardianAuth() {
               />
             </Field>
 
+            {mode === "signin" && (
+              <div className="text-right">
+                <Link
+                  to="/guardian/forgot-password"
+                  className="text-xs text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+            )}
+
             <button
               disabled={loading}
               className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-primary py-3 font-semibold text-primary-foreground shadow-glow transition hover:scale-[1.01] disabled:opacity-60"
