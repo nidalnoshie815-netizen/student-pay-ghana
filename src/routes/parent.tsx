@@ -20,12 +20,20 @@ export const Route = createFileRoute("/parent")({
 });
 
 function ParentDashboard() {
+  const navigate = useNavigate();
+  const guardian = useGuardian();
   const { account, transactions } = useStore();
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState<PaymentMethod | null>("MTN MoMo");
-  const [studentId, setStudentId] = useState(account.studentId);
+  const [studentId, setStudentId] = useState(guardian?.studentId ?? account.studentId);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!guardian) navigate({ to: "/guardian/auth" });
+  }, [guardian, navigate]);
+
+  if (!guardian) return null;
 
   async function handlePay(e: React.FormEvent) {
     e.preventDefault();
