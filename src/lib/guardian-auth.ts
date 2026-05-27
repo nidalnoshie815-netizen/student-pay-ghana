@@ -96,3 +96,74 @@ export async function signIn(email: string, password: string): Promise<Guardian>
 export function signOut() {
   setSession(null);
 }
+
+// ---------- Password reset (mock OTP) ----------
+// Since there's no backend yet, the OTP is generated locally and shown to the
+// user (simulating the email). Stored with an expiry in localStorage.
+
+const RESET_KEY = "studentpay_guardian_reset_v1";
+const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+interface ResetRecord {
+  email: string;
+  code: string;
+  expiresAt: number;
+}
+
+function loadResets(): ResetRecord[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(RESET_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+function saveResets(r: ResetRecord[]) {
+  localStorage.setItem(RESET_KEY, JSON.stringify(r));
+}
+
+function genCode(): string {
+  // 6-digit numeric
+  const n = Math.floor(100000 + Math.random() * 900000);
+  return String(n);
+}
+
+export function requestPasswordReset(email: string): { code: string; email: string } {
+  const users = loadUsers();
+  const normalized = email.trim().toLowerCase();
+  const u = users.find((x) => x.email === normalized);
+  if (!u) throw new Error("No account found for this email");
+  const code = genCode();
+  const resets = loadResets().filter((r) => r.email !== normalized);
+  resets.push({ email: normalized, code, expiresAt: Date.now() + OTP_TTL_MS });
+  saveResets(resets);
+  // In a real app, this would email the code. Here we return it so the UI can
+  // show it (mock email delivery).
+  return { code, email: normalized };
+}
+
+export function verifyResetCode(email: string, code: string): boolean {
+  const normalized = email.trim().toLowerCase();
+  const rec = loadResets().find((r) => r.email === normalized);
+  if (!rec) throw new Error("No reset request found. Please request a new code.");
+  if (Date.now() > rec.expiresAt) throw new Error("Code expired. Request a new one.");
+  if (rec.code !== code.trim()) throw new Error("Incorrect code");
+  return true;
+}
+
+export async function resetPassword(input: {
+  email: string;
+  code: string;
+  newPassword: string;
+}): Promise<void> {
+  verifyResetCode(input.email, input.code);
+  if (input.newPassword.length < 6) throw new Error("Password must be at least 6 characters");
+  const normalized = input.email.trim().toLowerCase();
+  const users = loadUsers();
+  const idx = users.findIndex((u) => u.email === normalized);
+  if (idx === -1) throw new Error("Account not found");
+  users[idx].passwordHash = await hash(input.newPassword);
+  saveUsers(users);
+  // consume the code
+  saveResets(loadResets().filter((r) => r.email !== normalized));
+}
