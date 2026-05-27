@@ -9,16 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as StudentRouteImport } from './routes/student'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuardianAuthRouteImport } from './routes/guardian.auth'
 
-const StudentRoute = StudentRouteImport.update({
-  id: '/student',
-  path: '/student',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ParentRoute = ParentRouteImport.update({
   id: '/parent',
   path: '/parent',
@@ -38,46 +32,35 @@ const GuardianAuthRoute = GuardianAuthRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/parent': typeof ParentRoute
-  '/student': typeof StudentRoute
   '/guardian/auth': typeof GuardianAuthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/parent': typeof ParentRoute
-  '/student': typeof StudentRoute
   '/guardian/auth': typeof GuardianAuthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/parent': typeof ParentRoute
-  '/student': typeof StudentRoute
   '/guardian/auth': typeof GuardianAuthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/parent' | '/student' | '/guardian/auth'
+  fullPaths: '/' | '/parent' | '/guardian/auth'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/parent' | '/student' | '/guardian/auth'
-  id: '__root__' | '/' | '/parent' | '/student' | '/guardian/auth'
+  to: '/' | '/parent' | '/guardian/auth'
+  id: '__root__' | '/' | '/parent' | '/guardian/auth'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ParentRoute: typeof ParentRoute
-  StudentRoute: typeof StudentRoute
   GuardianAuthRoute: typeof GuardianAuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/student': {
-      id: '/student'
-      path: '/student'
-      fullPath: '/student'
-      preLoaderRoute: typeof StudentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/parent': {
       id: '/parent'
       path: '/parent'
@@ -105,7 +88,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ParentRoute: ParentRoute,
-  StudentRoute: StudentRoute,
   GuardianAuthRoute: GuardianAuthRoute,
 }
 export const routeTree = rootRouteImport

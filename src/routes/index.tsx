@@ -61,12 +61,6 @@ function Landing() {
               >
                 I'm a Parent <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
               </Link>
-              <Link
-                to="/student"
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 font-semibold transition hover:border-primary"
-              >
-                I'm a Student
-              </Link>
             </div>
 
             <div className="mt-10 flex items-center gap-6 text-xs text-muted-foreground">
