@@ -1,19 +1,28 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import { addDeposit, formatGHS, type PaymentMethod } from "@/lib/mock-store";
 import { useStore } from "@/hooks/use-store";
 import { useGuardian } from "@/hooks/use-guardian";
 import { signOut } from "@/lib/guardian-auth";
-import { ArrowDownLeft, ArrowUpRight, Bell, CheckCircle2, Loader2, LogOut } from "lucide-react";
+import { generateAIAlerts, type AlertLevel } from "@/lib/ai-alerts";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Bell,
+  CheckCircle2,
+  Loader2,
+  LogOut,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/parent")({
   head: () => ({
     meta: [
       { title: "Parent Dashboard — StudentPay" },
-      { name: "description", content: "Top up your student and view withdrawal notifications." },
+      { name: "description", content: "Top up your student and get AI-powered alerts." },
     ],
   }),
   component: ParentDashboard,
@@ -33,6 +42,11 @@ function ParentDashboard() {
     if (!guardian) navigate({ to: "/guardian/auth" });
   }, [guardian, navigate]);
 
+  const aiAlerts = useMemo(
+    () => generateAIAlerts(account, transactions),
+    [account, transactions],
+  );
+
   if (!guardian) return null;
 
   async function handlePay(e: React.FormEvent) {
@@ -43,7 +57,12 @@ function ParentDashboard() {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 1100));
     try {
-      addDeposit({ amount: amt, method, studentId, parentName: guardian?.fullName ?? "Guardian" });
+      addDeposit({
+        amount: amt,
+        method,
+        studentId,
+        parentName: guardian?.fullName ?? "Guardian",
+      });
       setSuccess(true);
       setAmount("");
       toast.success(`${formatGHS(amt)} sent via ${method}`);
@@ -59,27 +78,50 @@ function ParentDashboard() {
 
   return (
     <div className="min-h-screen">
-      <Header
-        tab="parent"
-        right={
-          <div className="ml-2 flex items-center gap-2">
-            <div className="hidden text-right text-xs sm:block">
-              <div className="font-medium text-foreground">{guardian.fullName}</div>
-              <div className="text-muted-foreground">{guardian.email}</div>
-            </div>
-            <button
-              onClick={() => {
-                signOut();
-                navigate({ to: "/" });
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-foreground"
-            >
-              <LogOut className="h-3.5 w-3.5" /> Sign out
-            </button>
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
+        <Logo />
+        <div className="flex items-center gap-3">
+          <div className="hidden text-right text-xs sm:block">
+            <div className="font-medium text-foreground">{guardian.fullName}</div>
+            <div className="text-muted-foreground">{guardian.email}</div>
           </div>
-        }
-      />
+          <button
+            onClick={() => {
+              signOut();
+              navigate({ to: "/" });
+            }}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-foreground"
+          >
+            <LogOut className="h-3.5 w-3.5" /> Sign out
+          </button>
+        </div>
+      </header>
+
       <main className="mx-auto max-w-6xl px-6 pb-16">
+        {/* AI Alerts banner */}
+        <section className="mb-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent p-5">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-primary">
+              AI Alerts
+            </h2>
+            <span className="ml-auto rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
+              LIVE
+            </span>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {aiAlerts.map((a) => (
+              <AlertCard
+                key={a.id}
+                level={a.level}
+                title={a.title}
+                emoji={a.emoji}
+                message={a.message}
+              />
+            ))}
+          </div>
+        </section>
+
         <div className="grid gap-6 md:grid-cols-3">
           {/* Linked student */}
           <section className="md:col-span-1">
@@ -105,7 +147,7 @@ function ParentDashboard() {
               </div>
             </div>
 
-            {/* Notifications */}
+            {/* Withdrawal alerts */}
             <h2 className="mt-8 flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
               <Bell className="h-3 w-3" /> Withdrawal alerts
             </h2>
@@ -224,6 +266,43 @@ function ParentDashboard() {
   );
 }
 
+function AlertCard({
+  level,
+  title,
+  emoji,
+  message,
+}: {
+  level: AlertLevel;
+  title: string;
+  emoji: string;
+  message: string;
+}) {
+  const styles: Record<AlertLevel, string> = {
+    info: "border-border bg-card",
+    success: "border-primary/40 bg-primary/5",
+    warning: "border-warning/40 bg-warning/5",
+    critical: "border-destructive/50 bg-destructive/10",
+  };
+  const dot: Record<AlertLevel, string> = {
+    info: "bg-muted-foreground",
+    success: "bg-primary",
+    warning: "bg-warning",
+    critical: "bg-destructive",
+  };
+  return (
+    <div className={`rounded-xl border p-4 ${styles[level]}`}>
+      <div className="flex items-center gap-2">
+        <span className={`h-2 w-2 rounded-full ${dot[level]}`} />
+        <div className="text-sm font-semibold">
+          <span className="mr-1.5">{emoji}</span>
+          {title}
+        </div>
+      </div>
+      <div className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{message}</div>
+    </div>
+  );
+}
+
 function TxRow({ tx }: { tx: import("@/lib/mock-store").Transaction }) {
   const isDeposit = tx.type === "deposit";
   return (
@@ -258,46 +337,4 @@ function timeAgo(ts: number) {
   if (s < 3600) return `${Math.floor(s / 60)}m ago`;
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
   return `${Math.floor(s / 86400)}d ago`;
-}
-
-export function Header({ tab, right }: { tab: "parent" | "student"; right?: React.ReactNode }) {
-  return (
-    <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-      <Logo />
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1">
-          <TabLink to="/parent" active={tab === "parent"}>
-            Parent
-          </TabLink>
-          <TabLink to="/student" active={tab === "student"}>
-            Student
-          </TabLink>
-        </div>
-        {right}
-      </div>
-    </header>
-  );
-}
-
-function TabLink({
-  to,
-  active,
-  children,
-}: {
-  to: string;
-  active: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      to={to}
-      className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-        active
-          ? "bg-gradient-primary text-primary-foreground shadow-glow"
-          : "text-muted-foreground hover:text-foreground"
-      }`}
-    >
-      {children}
-    </Link>
-  );
 }
