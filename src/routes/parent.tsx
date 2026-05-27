@@ -43,7 +43,7 @@ function ParentDashboard() {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 1100));
     try {
-      addDeposit({ amount: amt, method, studentId, parentName: account.parentName });
+      addDeposit({ amount: amt, method, studentId, parentName: guardian.fullName });
       setSuccess(true);
       setAmount("");
       toast.success(`${formatGHS(amt)} sent via ${method}`);
