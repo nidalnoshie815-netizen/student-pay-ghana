@@ -1,0 +1,188 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { Logo } from "@/components/Logo";
+import { signIn, signUp } from "@/lib/guardian-auth";
+import { Loader2, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/guardian/auth")({
+  head: () => ({
+    meta: [
+      { title: "Guardian Sign In — StudentPay" },
+      { name: "description", content: "Sign in or create a guardian account to manage your student's wallet." },
+    ],
+  }),
+  component: GuardianAuth,
+});
+
+function GuardianAuth() {
+  const navigate = useNavigate();
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [loading, setLoading] = useState(false);
+
+  // shared
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  // signup
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [studentId, setStudentId] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (mode === "signin") {
+        await signIn(email, password);
+        toast.success("Welcome back");
+      } else {
+        if (!fullName || !phone || !studentId) throw new Error("Please fill in all fields");
+        await signUp({ fullName, email, phone, studentId, password });
+        toast.success("Account created");
+      }
+      navigate({ to: "/parent" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen">
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
+        <Logo />
+        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
+          ← Back home
+        </Link>
+      </header>
+
+      <main className="mx-auto grid max-w-5xl gap-10 px-6 pb-16 md:grid-cols-2 md:items-center">
+        <section className="hidden md:block">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Guardian account
+          </div>
+          <h1 className="mt-4 font-display text-4xl font-bold leading-tight">
+            Stay in control of every <span className="text-primary">GH₵</span> your student spends.
+          </h1>
+          <p className="mt-4 text-muted-foreground">
+            Sign up once with your student's ID, then top up via MTN MoMo, Vodafone Cash,
+            Telecel Cash or AirtelTigo Money and get instant withdrawal alerts.
+          </p>
+        </section>
+
+        <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
+          <div className="flex items-center gap-1 rounded-full border border-border bg-background/40 p-1">
+            <button
+              type="button"
+              onClick={() => setMode("signin")}
+              className={`flex-1 rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                mode === "signin"
+                  ? "bg-gradient-primary text-primary-foreground shadow-glow"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Sign in
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("signup")}
+              className={`flex-1 rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                mode === "signup"
+                  ? "bg-gradient-primary text-primary-foreground shadow-glow"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Create account
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            {mode === "signup" && (
+              <>
+                <Field label="Full name">
+                  <input
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Akosua Mensah"
+                    className="input-field"
+                    required
+                  />
+                </Field>
+                <Field label="Phone number">
+                  <input
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="024 555 8821"
+                    className="input-field"
+                    required
+                  />
+                </Field>
+                <Field label="Student ID code">
+                  <input
+                    value={studentId}
+                    onChange={(e) => setStudentId(e.target.value.toUpperCase())}
+                    placeholder="SP-XXXX-XXXX"
+                    className="input-field font-mono tracking-widest"
+                    required
+                  />
+                </Field>
+              </>
+            )}
+
+            <Field label="Email">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@email.com"
+                className="input-field"
+                required
+              />
+            </Field>
+
+            <Field label="Password">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 6 characters"
+                className="input-field"
+                required
+                minLength={6}
+              />
+            </Field>
+
+            <button
+              disabled={loading}
+              className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-primary py-3 font-semibold text-primary-foreground shadow-glow transition hover:scale-[1.01] disabled:opacity-60"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {mode === "signin" ? "Sign in" : "Create guardian account"}
+            </button>
+          </form>
+
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            {mode === "signin" ? "New here?" : "Already have an account?"}{" "}
+            <button
+              type="button"
+              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              className="text-primary hover:underline"
+            >
+              {mode === "signin" ? "Create one" : "Sign in"}
+            </button>
+          </p>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      <div className="mt-1">{children}</div>
+    </label>
+  );
+}

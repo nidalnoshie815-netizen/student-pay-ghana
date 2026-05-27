@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudentRouteImport } from './routes/student'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuardianAuthRouteImport } from './routes/guardian.auth'
 
 const StudentRoute = StudentRouteImport.update({
   id: '/student',
@@ -28,35 +29,44 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuardianAuthRoute = GuardianAuthRouteImport.update({
+  id: '/guardian/auth',
+  path: '/guardian/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/parent': typeof ParentRoute
   '/student': typeof StudentRoute
+  '/guardian/auth': typeof GuardianAuthRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/parent': typeof ParentRoute
   '/student': typeof StudentRoute
+  '/guardian/auth': typeof GuardianAuthRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/parent': typeof ParentRoute
   '/student': typeof StudentRoute
+  '/guardian/auth': typeof GuardianAuthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/parent' | '/student'
+  fullPaths: '/' | '/parent' | '/student' | '/guardian/auth'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/parent' | '/student'
-  id: '__root__' | '/' | '/parent' | '/student'
+  to: '/' | '/parent' | '/student' | '/guardian/auth'
+  id: '__root__' | '/' | '/parent' | '/student' | '/guardian/auth'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ParentRoute: typeof ParentRoute
   StudentRoute: typeof StudentRoute
+  GuardianAuthRoute: typeof GuardianAuthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guardian/auth': {
+      id: '/guardian/auth'
+      path: '/guardian/auth'
+      fullPath: '/guardian/auth'
+      preLoaderRoute: typeof GuardianAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ParentRoute: ParentRoute,
   StudentRoute: StudentRoute,
+  GuardianAuthRoute: GuardianAuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

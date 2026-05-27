@@ -1,10 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import { addDeposit, formatGHS, type PaymentMethod } from "@/lib/mock-store";
 import { useStore } from "@/hooks/use-store";
-import { ArrowDownLeft, ArrowUpRight, Bell, CheckCircle2, Loader2 } from "lucide-react";
+import { useGuardian } from "@/hooks/use-guardian";
+import { signOut } from "@/lib/guardian-auth";
+import { ArrowDownLeft, ArrowUpRight, Bell, CheckCircle2, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/parent")({
@@ -18,12 +20,20 @@ export const Route = createFileRoute("/parent")({
 });
 
 function ParentDashboard() {
+  const navigate = useNavigate();
+  const guardian = useGuardian();
   const { account, transactions } = useStore();
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState<PaymentMethod | null>("MTN MoMo");
-  const [studentId, setStudentId] = useState(account.studentId);
+  const [studentId, setStudentId] = useState(guardian?.studentId ?? account.studentId);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!guardian) navigate({ to: "/guardian/auth" });
+  }, [guardian, navigate]);
+
+  if (!guardian) return null;
 
   async function handlePay(e: React.FormEvent) {
     e.preventDefault();
@@ -33,7 +43,7 @@ function ParentDashboard() {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 1100));
     try {
-      addDeposit({ amount: amt, method, studentId, parentName: account.parentName });
+      addDeposit({ amount: amt, method, studentId, parentName: guardian?.fullName ?? "Guardian" });
       setSuccess(true);
       setAmount("");
       toast.success(`${formatGHS(amt)} sent via ${method}`);
@@ -49,7 +59,26 @@ function ParentDashboard() {
 
   return (
     <div className="min-h-screen">
-      <Header tab="parent" />
+      <Header
+        tab="parent"
+        right={
+          <div className="ml-2 flex items-center gap-2">
+            <div className="hidden text-right text-xs sm:block">
+              <div className="font-medium text-foreground">{guardian.fullName}</div>
+              <div className="text-muted-foreground">{guardian.email}</div>
+            </div>
+            <button
+              onClick={() => {
+                signOut();
+                navigate({ to: "/" });
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-foreground"
+            >
+              <LogOut className="h-3.5 w-3.5" /> Sign out
+            </button>
+          </div>
+        }
+      />
       <main className="mx-auto max-w-6xl px-6 pb-16">
         <div className="grid gap-6 md:grid-cols-3">
           {/* Linked student */}
@@ -231,17 +260,20 @@ function timeAgo(ts: number) {
   return `${Math.floor(s / 86400)}d ago`;
 }
 
-export function Header({ tab }: { tab: "parent" | "student" }) {
+export function Header({ tab, right }: { tab: "parent" | "student"; right?: React.ReactNode }) {
   return (
     <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
       <Logo />
-      <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1">
-        <TabLink to="/parent" active={tab === "parent"}>
-          Parent
-        </TabLink>
-        <TabLink to="/student" active={tab === "student"}>
-          Student
-        </TabLink>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1">
+          <TabLink to="/parent" active={tab === "parent"}>
+            Parent
+          </TabLink>
+          <TabLink to="/student" active={tab === "student"}>
+            Student
+          </TabLink>
+        </div>
+        {right}
       </div>
     </header>
   );
