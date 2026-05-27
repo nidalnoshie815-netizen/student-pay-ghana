@@ -260,17 +260,20 @@ function timeAgo(ts: number) {
   return `${Math.floor(s / 86400)}d ago`;
 }
 
-export function Header({ tab }: { tab: "parent" | "student" }) {
+export function Header({ tab, right }: { tab: "parent" | "student"; right?: React.ReactNode }) {
   return (
     <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
       <Logo />
-      <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1">
-        <TabLink to="/parent" active={tab === "parent"}>
-          Parent
-        </TabLink>
-        <TabLink to="/student" active={tab === "student"}>
-          Student
-        </TabLink>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1">
+          <TabLink to="/parent" active={tab === "parent"}>
+            Parent
+          </TabLink>
+          <TabLink to="/student" active={tab === "student"}>
+            Student
+          </TabLink>
+        </div>
+        {right}
       </div>
     </header>
   );
