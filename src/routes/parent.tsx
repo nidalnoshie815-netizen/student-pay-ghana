@@ -1,10 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { PaymentMethodPicker } from "@/components/PaymentMethodPicker";
 import { addDeposit, formatGHS, type PaymentMethod } from "@/lib/mock-store";
 import { useStore } from "@/hooks/use-store";
-import { ArrowDownLeft, ArrowUpRight, Bell, CheckCircle2, Loader2 } from "lucide-react";
+import { useGuardian } from "@/hooks/use-guardian";
+import { signOut } from "@/lib/guardian-auth";
+import { ArrowDownLeft, ArrowUpRight, Bell, CheckCircle2, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/parent")({
