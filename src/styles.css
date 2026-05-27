@@ -101,4 +101,14 @@
   .shadow-glow { box-shadow: var(--shadow-glow); }
   .shadow-card { box-shadow: var(--shadow-card); }
   .text-balance { text-wrap: balance; }
+  .input-field {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    background-color: var(--input);
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .input-field:focus { border-color: var(--primary); }
 }
