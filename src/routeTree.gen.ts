@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuardianProfileRouteImport } from './routes/guardian.profile'
 import { Route as GuardianForgotPasswordRouteImport } from './routes/guardian.forgot-password'
 import { Route as GuardianAuthRouteImport } from './routes/guardian.auth'
 
@@ -22,6 +23,11 @@ const ParentRoute = ParentRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuardianProfileRoute = GuardianProfileRouteImport.update({
+  id: '/guardian/profile',
+  path: '/guardian/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuardianForgotPasswordRoute = GuardianForgotPasswordRouteImport.update({
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   '/parent': typeof ParentRoute
   '/guardian/auth': typeof GuardianAuthRoute
   '/guardian/forgot-password': typeof GuardianForgotPasswordRoute
+  '/guardian/profile': typeof GuardianProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/parent': typeof ParentRoute
   '/guardian/auth': typeof GuardianAuthRoute
   '/guardian/forgot-password': typeof GuardianForgotPasswordRoute
+  '/guardian/profile': typeof GuardianProfileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,18 +61,30 @@ export interface FileRoutesById {
   '/parent': typeof ParentRoute
   '/guardian/auth': typeof GuardianAuthRoute
   '/guardian/forgot-password': typeof GuardianForgotPasswordRoute
+  '/guardian/profile': typeof GuardianProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/parent' | '/guardian/auth' | '/guardian/forgot-password'
+  fullPaths:
+    | '/'
+    | '/parent'
+    | '/guardian/auth'
+    | '/guardian/forgot-password'
+    | '/guardian/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/parent' | '/guardian/auth' | '/guardian/forgot-password'
+  to:
+    | '/'
+    | '/parent'
+    | '/guardian/auth'
+    | '/guardian/forgot-password'
+    | '/guardian/profile'
   id:
     | '__root__'
     | '/'
     | '/parent'
     | '/guardian/auth'
     | '/guardian/forgot-password'
+    | '/guardian/profile'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -72,6 +92,7 @@ export interface RootRouteChildren {
   ParentRoute: typeof ParentRoute
   GuardianAuthRoute: typeof GuardianAuthRoute
   GuardianForgotPasswordRoute: typeof GuardianForgotPasswordRoute
+  GuardianProfileRoute: typeof GuardianProfileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -88,6 +109,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guardian/profile': {
+      id: '/guardian/profile'
+      path: '/guardian/profile'
+      fullPath: '/guardian/profile'
+      preLoaderRoute: typeof GuardianProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guardian/forgot-password': {
@@ -112,6 +140,7 @@ const rootRouteChildren: RootRouteChildren = {
   ParentRoute: ParentRoute,
   GuardianAuthRoute: GuardianAuthRoute,
   GuardianForgotPasswordRoute: GuardianForgotPasswordRoute,
+  GuardianProfileRoute: GuardianProfileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
