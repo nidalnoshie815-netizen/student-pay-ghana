@@ -31,10 +31,10 @@ function Landing() {
           <a href="#how" className="hover:text-foreground">How it works</a>
         </nav>
         <Link
-          to="/parent"
+          to="/guardian/auth"
           className="rounded-full bg-gradient-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-glow transition hover:scale-105"
         >
-          Open app
+          Guardian sign in
         </Link>
       </header>
 
