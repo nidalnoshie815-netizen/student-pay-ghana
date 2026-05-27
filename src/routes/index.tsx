@@ -56,7 +56,7 @@ function Landing() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                to="/parent"
+                to="/guardian/auth"
                 className="group inline-flex items-center gap-2 rounded-full bg-gradient-primary px-6 py-3 font-semibold text-primary-foreground shadow-glow transition hover:scale-105"
               >
                 I'm a Parent <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
