@@ -59,7 +59,26 @@ function ParentDashboard() {
 
   return (
     <div className="min-h-screen">
-      <Header tab="parent" />
+      <Header
+        tab="parent"
+        right={
+          <div className="ml-2 flex items-center gap-2">
+            <div className="hidden text-right text-xs sm:block">
+              <div className="font-medium text-foreground">{guardian.fullName}</div>
+              <div className="text-muted-foreground">{guardian.email}</div>
+            </div>
+            <button
+              onClick={() => {
+                signOut();
+                navigate({ to: "/" });
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-foreground"
+            >
+              <LogOut className="h-3.5 w-3.5" /> Sign out
+            </button>
+          </div>
+        }
+      />
       <main className="mx-auto max-w-6xl px-6 pb-16">
         <div className="grid gap-6 md:grid-cols-3">
           {/* Linked student */}
