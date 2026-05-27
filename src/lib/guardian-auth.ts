@@ -97,6 +97,28 @@ export function signOut() {
   setSession(null);
 }
 
+export function updateProfile(input: {
+  fullName: string;
+  phone: string;
+  studentId: string;
+}): Guardian {
+  const session = getSession();
+  if (!session) throw new Error("Not signed in");
+  const fullName = input.fullName.trim();
+  const phone = input.phone.trim();
+  const studentId = input.studentId.trim().toUpperCase();
+  if (!fullName) throw new Error("Full name is required");
+  if (!studentId) throw new Error("Student ID is required");
+  const users = loadUsers();
+  const idx = users.findIndex((u) => u.id === session.id);
+  if (idx === -1) throw new Error("Account not found");
+  users[idx] = { ...users[idx], fullName, phone, studentId };
+  saveUsers(users);
+  const { passwordHash: _ph, ...updated } = users[idx];
+  setSession(updated);
+  return updated;
+}
+
 // ---------- Password reset (mock OTP) ----------
 // Since there's no backend yet, the OTP is generated locally and shown to the
 // user (simulating the email). Stored with an expiry in localStorage.
