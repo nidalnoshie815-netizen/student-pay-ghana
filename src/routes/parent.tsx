@@ -81,10 +81,13 @@ function ParentDashboard() {
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <Logo />
         <div className="flex items-center gap-3">
-          <div className="hidden text-right text-xs sm:block">
-            <div className="font-medium text-foreground">{guardian.fullName}</div>
+          <Link
+            to="/guardian/profile"
+            className="hidden text-right text-xs sm:block group"
+          >
+            <div className="font-medium text-foreground group-hover:text-primary">{guardian.fullName}</div>
             <div className="text-muted-foreground">{guardian.email}</div>
-          </div>
+          </Link>
           <button
             onClick={() => {
               signOut();
