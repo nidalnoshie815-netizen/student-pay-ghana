@@ -99,7 +99,8 @@ function Landing() {
                 <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full border border-border bg-background/70 px-3 py-1 text-[11px] font-semibold text-foreground backdrop-blur">
                   <BookOpen className="h-3.5 w-3.5 text-primary" /> Learn. Earn. Spend smart.
                 </div>
-
+              </div>
+            </div>
           </div>
         </section>
 
