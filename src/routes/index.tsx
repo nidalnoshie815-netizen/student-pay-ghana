@@ -40,10 +40,10 @@ function Landing() {
 
       <main className="mx-auto max-w-6xl px-6">
         {/* HERO */}
-        <section className="relative py-16 md:py-24">
-          <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+        <section className="relative grid gap-10 py-16 md:grid-cols-2 md:py-24">
+          <div className="flex flex-col justify-center">
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-              <Sparkles className="h-3 w-3" /> AI-powered guardian dashboard
+              <Sparkles className="h-3 w-3" /> AI-powered student wallet
             </span>
             <h1 className="mt-5 text-balance font-display text-5xl font-bold leading-[1.05] md:text-6xl">
               Send pocket money.
@@ -51,10 +51,10 @@ function Landing() {
               <span className="text-primary">Skip the worry.</span>
             </h1>
             <p className="mt-5 max-w-md text-balance text-muted-foreground">
-              Parents top up using MTN MoMo, Vodafone, Telecel or AirtelTigo. Get live withdrawal
-              alerts and AI insights. Everything in Ghana Cedis.
+              Parents top up using MTN MoMo, Vodafone, Telecel or AirtelTigo. Students withdraw
+              instantly with a secure Student ID. Everything in Ghana Cedis.
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 to="/guardian/auth"
                 className="group inline-flex items-center gap-2 rounded-full bg-gradient-primary px-6 py-3 font-semibold text-primary-foreground shadow-glow transition hover:scale-105"
@@ -69,6 +69,49 @@ function Landing() {
               </div>
               <div className="flex items-center gap-2">
                 <Smartphone className="h-4 w-4 text-primary" /> Mobile money native
+              </div>
+            </div>
+          </div>
+
+          {/* Visual card */}
+          <div className="relative flex items-center justify-center">
+            <div className="absolute -inset-10 bg-gradient-primary opacity-20 blur-3xl" />
+            <div className="relative w-full max-w-sm rounded-3xl border border-border bg-card p-6 shadow-card">
+              <div className="flex items-center justify-between">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Student wallet
+                </span>
+                <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                  ACTIVE
+                </span>
+              </div>
+              <div className="mt-4">
+                <div className="text-xs text-muted-foreground">Balance</div>
+                <div className="font-display text-4xl font-bold tracking-tight">GH₵ 420.00</div>
+              </div>
+              <div className="mt-6 rounded-xl bg-background/60 p-4">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Student ID
+                </div>
+                <div className="mt-1 font-mono text-lg tracking-widest text-primary">
+                  SP-7F4K-92AC
+                </div>
+              </div>
+              <div className="mt-6 grid grid-cols-4 gap-2">
+                {["MTN", "VOD", "TEL", "AT"].map((s, i) => (
+                  <div
+                    key={s}
+                    className="flex h-10 items-center justify-center rounded-lg text-xs font-bold text-black"
+                    style={{
+                      background: ["#FFCC08", "#E60000", "#E60000", "#005EB8"][i],
+                    }}
+                  >
+                    {s}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-center text-[10px] text-muted-foreground">
+                Accepts all Ghana mobile money
               </div>
             </div>
           </div>
