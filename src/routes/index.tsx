@@ -73,47 +73,11 @@ function Landing() {
             </div>
           </div>
 
-          {/* Visual card */}
-          <div className="relative flex items-center justify-center">
-            <div className="absolute -inset-10 bg-gradient-primary opacity-20 blur-3xl" />
-            <div className="relative w-full max-w-sm rounded-3xl border border-border bg-card p-6 shadow-card">
-              <div className="flex items-center justify-between">
-                <span className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Student wallet
-                </span>
-                <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                  ACTIVE
-                </span>
-              </div>
-              <div className="mt-4">
-                <div className="text-xs text-muted-foreground">Balance</div>
-                <div className="font-display text-4xl font-bold tracking-tight">GH₵ 420.00</div>
-              </div>
-              <div className="mt-6 rounded-xl bg-background/60 p-4">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Student ID
-                </div>
-                <div className="mt-1 font-mono text-lg tracking-widest text-primary">
-                  SP-7F4K-92AC
-                </div>
-              </div>
-              <div className="mt-6 grid grid-cols-4 gap-2">
-                {["MTN", "VOD", "TEL", "AT"].map((s, i) => (
-                  <div
-                    key={s}
-                    className="flex h-10 items-center justify-center rounded-lg text-xs font-bold text-black"
-                    style={{
-                      background: ["#FFCC08", "#E60000", "#E60000", "#005EB8"][i],
-                    }}
-                  >
-                    {s}
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 text-center text-[10px] text-muted-foreground">
-                Accepts all Ghana mobile money
-              </div>
-            </div>
+          {/* Ambient gradient visual (wallet card removed) */}
+          <div className="relative hidden min-h-[360px] items-center justify-center md:flex">
+            <div className="absolute inset-0 bg-gradient-primary opacity-25 blur-3xl" />
+            <div className="absolute right-10 top-10 h-40 w-40 rounded-full bg-primary/30 blur-3xl" />
+            <div className="absolute bottom-6 left-6 h-32 w-32 rounded-full bg-accent/30 blur-3xl" />
           </div>
         </section>
 
