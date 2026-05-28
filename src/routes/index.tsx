@@ -99,20 +99,6 @@ function Landing() {
                 <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full border border-border bg-background/70 px-3 py-1 text-[11px] font-semibold text-foreground backdrop-blur">
                   <BookOpen className="h-3.5 w-3.5 text-primary" /> Learn. Earn. Spend smart.
                 </div>
-
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-2xl border border-border bg-background/80 px-4 py-3 backdrop-blur">
-                  <div>
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Trusted by
-                    </div>
-                    <div className="font-display text-lg font-bold">
-                      12,000+ <span className="text-primary">students</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-[11px] font-semibold text-primary">
-                    <Sparkles className="h-3 w-3" /> AI alerts
-                  </div>
-                </div>
               </div>
             </div>
           </div>
