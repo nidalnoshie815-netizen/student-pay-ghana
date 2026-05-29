@@ -8,6 +8,12 @@ export const PAYMENT_METHODS: { id: PaymentMethod; color: string; short: string 
   { id: "AirtelTigo Money", color: "#005EB8", short: "AT" },
 ];
 
+export type TxCategory =
+  | "POS Withdrawal"
+  | "Wallet Funding"
+  | "Transfer"
+  | "Vendor Payment";
+
 export interface Transaction {
   id: string;
   type: "deposit" | "withdrawal";
@@ -17,6 +23,7 @@ export interface Transaction {
   studentName: string;
   parentName?: string;
   note?: string;
+  category?: TxCategory;
   status: "pending" | "completed";
   createdAt: number;
 }
