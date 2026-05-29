@@ -128,6 +128,7 @@ export function addDeposit(input: {
     studentId: s.account.studentId,
     studentName: s.account.studentName,
     parentName: input.parentName,
+    category: "Wallet Funding",
     status: "completed",
     createdAt: Date.now(),
   };
