@@ -138,7 +138,12 @@ export function addDeposit(input: {
   return tx;
 }
 
-export function addWithdrawal(input: { amount: number; studentId: string; note?: string }) {
+export function addWithdrawal(input: {
+  amount: number;
+  studentId: string;
+  note?: string;
+  category?: TxCategory;
+}) {
   const s = load();
   if (input.studentId.trim().toUpperCase() !== s.account.studentId.toUpperCase()) {
     throw new Error("Invalid Student ID");
@@ -151,6 +156,7 @@ export function addWithdrawal(input: { amount: number; studentId: string; note?:
     studentId: s.account.studentId,
     studentName: s.account.studentName,
     note: input.note,
+    category: input.category ?? "Vendor Payment",
     status: "completed",
     createdAt: Date.now(),
   };
