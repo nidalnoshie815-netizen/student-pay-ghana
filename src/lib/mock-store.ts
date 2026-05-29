@@ -8,6 +8,12 @@ export const PAYMENT_METHODS: { id: PaymentMethod; color: string; short: string 
   { id: "AirtelTigo Money", color: "#005EB8", short: "AT" },
 ];
 
+export type TxCategory =
+  | "POS Withdrawal"
+  | "Wallet Funding"
+  | "Transfer"
+  | "Vendor Payment";
+
 export interface Transaction {
   id: string;
   type: "deposit" | "withdrawal";
@@ -17,6 +23,7 @@ export interface Transaction {
   studentName: string;
   parentName?: string;
   note?: string;
+  category?: TxCategory;
   status: "pending" | "completed";
   createdAt: number;
 }
@@ -55,6 +62,7 @@ const defaultState: State = {
       studentId: "SP-7F4K-92AC",
       studentName: "Kwame Mensah",
       parentName: "Akosua Mensah",
+      category: "Wallet Funding",
       status: "completed",
       createdAt: Date.now() - 86400000 * 2,
     },
@@ -65,6 +73,7 @@ const defaultState: State = {
       studentId: "SP-7F4K-92AC",
       studentName: "Kwame Mensah",
       note: "Campus cafeteria",
+      category: "Vendor Payment",
       status: "completed",
       createdAt: Date.now() - 86400000,
     },
@@ -72,12 +81,35 @@ const defaultState: State = {
       id: "t3",
       type: "deposit",
       amount: 200,
-      method: "Vodafone Cash",
+      method: "Telecel Cash",
       studentId: "SP-7F4K-92AC",
       studentName: "Kwame Mensah",
       parentName: "Akosua Mensah",
+      category: "Wallet Funding",
       status: "completed",
       createdAt: Date.now() - 3600000 * 5,
+    },
+    {
+      id: "t4",
+      type: "withdrawal",
+      amount: 50,
+      studentId: "SP-7F4K-92AC",
+      studentName: "Kwame Mensah",
+      note: "POS at MaxMart",
+      category: "POS Withdrawal",
+      status: "completed",
+      createdAt: Date.now() - 3600000 * 2,
+    },
+    {
+      id: "t5",
+      type: "withdrawal",
+      amount: 30,
+      studentId: "SP-7F4K-92AC",
+      studentName: "Kwame Mensah",
+      note: "Transfer to roommate",
+      category: "Transfer",
+      status: "completed",
+      createdAt: Date.now() - 3600000,
     },
   ],
 };
@@ -121,6 +153,7 @@ export function addDeposit(input: {
     studentId: s.account.studentId,
     studentName: s.account.studentName,
     parentName: input.parentName,
+    category: "Wallet Funding",
     status: "completed",
     createdAt: Date.now(),
   };
@@ -130,7 +163,12 @@ export function addDeposit(input: {
   return tx;
 }
 
-export function addWithdrawal(input: { amount: number; studentId: string; note?: string }) {
+export function addWithdrawal(input: {
+  amount: number;
+  studentId: string;
+  note?: string;
+  category?: TxCategory;
+}) {
   const s = load();
   if (input.studentId.trim().toUpperCase() !== s.account.studentId.toUpperCase()) {
     throw new Error("Invalid Student ID");
@@ -143,6 +181,7 @@ export function addWithdrawal(input: { amount: number; studentId: string; note?:
     studentId: s.account.studentId,
     studentName: s.account.studentName,
     note: input.note,
+    category: input.category ?? "Vendor Payment",
     status: "completed",
     createdAt: Date.now(),
   };

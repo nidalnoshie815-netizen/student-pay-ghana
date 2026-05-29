@@ -9,15 +9,36 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as ParentRouteImport } from './routes/parent'
+import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as AddMoneyRouteImport } from './routes/add-money'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuardianProfileRouteImport } from './routes/guardian.profile'
 import { Route as GuardianForgotPasswordRouteImport } from './routes/guardian.forgot-password'
 import { Route as GuardianAuthRouteImport } from './routes/guardian.auth'
+import { Route as AddMoneyTelecelRouteImport } from './routes/add-money.telecel'
+import { Route as AddMoneyMtnRouteImport } from './routes/add-money.mtn'
+import { Route as AddMoneyAirteltigoRouteImport } from './routes/add-money.airteltigo'
 
+const TransactionsRoute = TransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ParentRoute = ParentRouteImport.update({
   id: '/parent',
   path: '/parent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsRoute = InsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AddMoneyRoute = AddMoneyRouteImport.update({
+  id: '/add-money',
+  path: '/add-money',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -40,17 +61,44 @@ const GuardianAuthRoute = GuardianAuthRouteImport.update({
   path: '/guardian/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AddMoneyTelecelRoute = AddMoneyTelecelRouteImport.update({
+  id: '/telecel',
+  path: '/telecel',
+  getParentRoute: () => AddMoneyRoute,
+} as any)
+const AddMoneyMtnRoute = AddMoneyMtnRouteImport.update({
+  id: '/mtn',
+  path: '/mtn',
+  getParentRoute: () => AddMoneyRoute,
+} as any)
+const AddMoneyAirteltigoRoute = AddMoneyAirteltigoRouteImport.update({
+  id: '/airteltigo',
+  path: '/airteltigo',
+  getParentRoute: () => AddMoneyRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/add-money': typeof AddMoneyRouteWithChildren
+  '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
+  '/transactions': typeof TransactionsRoute
+  '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
+  '/add-money/mtn': typeof AddMoneyMtnRoute
+  '/add-money/telecel': typeof AddMoneyTelecelRoute
   '/guardian/auth': typeof GuardianAuthRoute
   '/guardian/forgot-password': typeof GuardianForgotPasswordRoute
   '/guardian/profile': typeof GuardianProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/add-money': typeof AddMoneyRouteWithChildren
+  '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
+  '/transactions': typeof TransactionsRoute
+  '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
+  '/add-money/mtn': typeof AddMoneyMtnRoute
+  '/add-money/telecel': typeof AddMoneyTelecelRoute
   '/guardian/auth': typeof GuardianAuthRoute
   '/guardian/forgot-password': typeof GuardianForgotPasswordRoute
   '/guardian/profile': typeof GuardianProfileRoute
@@ -58,7 +106,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/add-money': typeof AddMoneyRouteWithChildren
+  '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
+  '/transactions': typeof TransactionsRoute
+  '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
+  '/add-money/mtn': typeof AddMoneyMtnRoute
+  '/add-money/telecel': typeof AddMoneyTelecelRoute
   '/guardian/auth': typeof GuardianAuthRoute
   '/guardian/forgot-password': typeof GuardianForgotPasswordRoute
   '/guardian/profile': typeof GuardianProfileRoute
@@ -67,21 +121,39 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/add-money'
+    | '/insights'
     | '/parent'
+    | '/transactions'
+    | '/add-money/airteltigo'
+    | '/add-money/mtn'
+    | '/add-money/telecel'
     | '/guardian/auth'
     | '/guardian/forgot-password'
     | '/guardian/profile'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/add-money'
+    | '/insights'
     | '/parent'
+    | '/transactions'
+    | '/add-money/airteltigo'
+    | '/add-money/mtn'
+    | '/add-money/telecel'
     | '/guardian/auth'
     | '/guardian/forgot-password'
     | '/guardian/profile'
   id:
     | '__root__'
     | '/'
+    | '/add-money'
+    | '/insights'
     | '/parent'
+    | '/transactions'
+    | '/add-money/airteltigo'
+    | '/add-money/mtn'
+    | '/add-money/telecel'
     | '/guardian/auth'
     | '/guardian/forgot-password'
     | '/guardian/profile'
@@ -89,7 +161,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AddMoneyRoute: typeof AddMoneyRouteWithChildren
+  InsightsRoute: typeof InsightsRoute
   ParentRoute: typeof ParentRoute
+  TransactionsRoute: typeof TransactionsRoute
   GuardianAuthRoute: typeof GuardianAuthRoute
   GuardianForgotPasswordRoute: typeof GuardianForgotPasswordRoute
   GuardianProfileRoute: typeof GuardianProfileRoute
@@ -97,11 +172,32 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/transactions': {
+      id: '/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof TransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/parent': {
       id: '/parent'
       path: '/parent'
       fullPath: '/parent'
       preLoaderRoute: typeof ParentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights': {
+      id: '/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/add-money': {
+      id: '/add-money'
+      path: '/add-money'
+      fullPath: '/add-money'
+      preLoaderRoute: typeof AddMoneyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -132,12 +228,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuardianAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/add-money/telecel': {
+      id: '/add-money/telecel'
+      path: '/telecel'
+      fullPath: '/add-money/telecel'
+      preLoaderRoute: typeof AddMoneyTelecelRouteImport
+      parentRoute: typeof AddMoneyRoute
+    }
+    '/add-money/mtn': {
+      id: '/add-money/mtn'
+      path: '/mtn'
+      fullPath: '/add-money/mtn'
+      preLoaderRoute: typeof AddMoneyMtnRouteImport
+      parentRoute: typeof AddMoneyRoute
+    }
+    '/add-money/airteltigo': {
+      id: '/add-money/airteltigo'
+      path: '/airteltigo'
+      fullPath: '/add-money/airteltigo'
+      preLoaderRoute: typeof AddMoneyAirteltigoRouteImport
+      parentRoute: typeof AddMoneyRoute
+    }
   }
 }
 
+interface AddMoneyRouteChildren {
+  AddMoneyAirteltigoRoute: typeof AddMoneyAirteltigoRoute
+  AddMoneyMtnRoute: typeof AddMoneyMtnRoute
+  AddMoneyTelecelRoute: typeof AddMoneyTelecelRoute
+}
+
+const AddMoneyRouteChildren: AddMoneyRouteChildren = {
+  AddMoneyAirteltigoRoute: AddMoneyAirteltigoRoute,
+  AddMoneyMtnRoute: AddMoneyMtnRoute,
+  AddMoneyTelecelRoute: AddMoneyTelecelRoute,
+}
+
+const AddMoneyRouteWithChildren = AddMoneyRoute._addFileChildren(
+  AddMoneyRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AddMoneyRoute: AddMoneyRouteWithChildren,
+  InsightsRoute: InsightsRoute,
   ParentRoute: ParentRoute,
+  TransactionsRoute: TransactionsRoute,
   GuardianAuthRoute: GuardianAuthRoute,
   GuardianForgotPasswordRoute: GuardianForgotPasswordRoute,
   GuardianProfileRoute: GuardianProfileRoute,
@@ -145,13 +281,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -73,6 +73,13 @@
   --gradient-dark: linear-gradient(180deg, oklch(0.18 0.02 150), oklch(0.13 0.02 150));
   --shadow-glow: 0 10px 40px -10px oklch(0.78 0.22 145 / 0.35);
   --shadow-card: 0 8px 24px -8px oklch(0 0 0 / 0.5);
+
+  --brand-mtn: #FFCC08;
+  --brand-mtn-fg: #1a1a1a;
+  --brand-telecel: #E60000;
+  --brand-telecel-fg: #ffffff;
+  --brand-airteltigo: #005EB8;
+  --brand-airteltigo-fg: #ffffff;
 }
 
 .dark {
