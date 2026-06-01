@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
-import { signIn, signUp } from "@/lib/guardian-auth";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { signIn, signUp, type StudentLink } from "@/lib/guardian-auth";
+import { Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/guardian/auth")({
@@ -26,7 +26,19 @@ function GuardianAuth() {
   // signup
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [studentId, setStudentId] = useState("");
+  const [students, setStudents] = useState<StudentLink[]>([
+    { studentId: "", school: "" },
+  ]);
+
+  function updateStudent(index: number, patch: Partial<StudentLink>) {
+    setStudents((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
+  }
+  function addStudent() {
+    setStudents((prev) => [...prev, { studentId: "", school: "" }]);
+  }
+  function removeStudent(index: number) {
+    setStudents((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== index)));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,8 +48,12 @@ function GuardianAuth() {
         await signIn(email, password);
         toast.success("Welcome back");
       } else {
-        if (!fullName || !phone || !studentId) throw new Error("Please fill in all fields");
-        await signUp({ fullName, email, phone, studentId, password });
+        if (!fullName || !phone) throw new Error("Please fill in all fields");
+        const cleaned = students
+          .map((s) => ({ studentId: s.studentId.trim(), school: s.school.trim() }))
+          .filter((s) => s.studentId.length > 0);
+        if (cleaned.length === 0) throw new Error("Add at least one student ID");
+        await signUp({ fullName, email, phone, students: cleaned, password });
         toast.success("Account created");
       }
       navigate({ to: "/parent" });
@@ -118,15 +134,62 @@ function GuardianAuth() {
                     required
                   />
                 </Field>
-                <Field label="Student ID code">
-                  <input
-                    value={studentId}
-                    onChange={(e) => setStudentId(e.target.value.toUpperCase())}
-                    placeholder="SP-XXXX-XXXX"
-                    className="input-field font-mono tracking-widest"
-                    required
-                  />
-                </Field>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Children ({students.length})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={addStudent}
+                      className="inline-flex items-center gap-1 rounded-full border border-border bg-background/40 px-3 py-1 text-xs font-medium text-primary hover:bg-background"
+                    >
+                      <Plus className="h-3 w-3" /> Add child
+                    </button>
+                  </div>
+                  {students.length > 3 && (
+                    <p className="text-[11px] text-muted-foreground">
+                      Managing more than 3 students? Add each child's ID and school below — there's no limit.
+                    </p>
+                  )}
+                  {students.map((s, i) => (
+                    <div
+                      key={i}
+                      className="rounded-xl border border-border bg-background/40 p-3 space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          Child {i + 1}
+                        </span>
+                        {students.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeStudent(i)}
+                            className="text-muted-foreground hover:text-destructive"
+                            aria-label={`Remove child ${i + 1}`}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
+                      <input
+                        value={s.studentId}
+                        onChange={(e) => updateStudent(i, { studentId: e.target.value.toUpperCase() })}
+                        placeholder="Student ID — SP-XXXX-XXXX"
+                        className="input-field font-mono tracking-widest"
+                        required
+                      />
+                      <input
+                        value={s.school}
+                        onChange={(e) => updateStudent(i, { school: e.target.value })}
+                        placeholder="School name"
+                        className="input-field"
+                        required
+                      />
+                    </div>
+                  ))}
+                </div>
+
               </>
             )}
 

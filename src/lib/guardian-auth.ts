@@ -1,12 +1,18 @@
 // Lightweight mock auth for guardians (parents). Stored in localStorage.
 // Replace with Lovable Cloud auth when backend is enabled.
 
+export interface StudentLink {
+  studentId: string;
+  school: string;
+}
+
 export interface Guardian {
   id: string;
   fullName: string;
   email: string;
   phone: string;
-  studentId: string; // linked student
+  studentId: string; // primary (first) student — kept for back-compat
+  students: StudentLink[];
   createdAt: number;
 }
 
@@ -57,7 +63,8 @@ export async function signUp(input: {
   fullName: string;
   email: string;
   phone: string;
-  studentId: string;
+  studentId?: string;
+  students?: StudentLink[];
   password: string;
 }): Promise<Guardian> {
   const users = loadUsers();
@@ -66,12 +73,25 @@ export async function signUp(input: {
     throw new Error("An account with this email already exists");
   }
   if (input.password.length < 6) throw new Error("Password must be at least 6 characters");
+
+  const normalized: StudentLink[] = (input.students && input.students.length
+    ? input.students
+    : input.studentId
+    ? [{ studentId: input.studentId, school: "" }]
+    : []
+  )
+    .map((s) => ({ studentId: s.studentId.trim().toUpperCase(), school: s.school.trim() }))
+    .filter((s) => s.studentId.length > 0);
+
+  if (normalized.length === 0) throw new Error("Please add at least one student");
+
   const guardian: StoredGuardian = {
     id: crypto.randomUUID(),
     fullName: input.fullName.trim(),
     email,
     phone: input.phone.trim(),
-    studentId: input.studentId.trim().toUpperCase(),
+    studentId: normalized[0].studentId,
+    students: normalized,
     createdAt: Date.now(),
     passwordHash: await hash(input.password),
   };
@@ -88,6 +108,11 @@ export async function signIn(email: string, password: string): Promise<Guardian>
   if (!u) throw new Error("No account found for this email");
   const ph = await hash(password);
   if (ph !== u.passwordHash) throw new Error("Incorrect password");
+  // back-compat: ensure students array exists
+  if (!u.students || u.students.length === 0) {
+    u.students = [{ studentId: u.studentId, school: "" }];
+    saveUsers(users);
+  }
   const { passwordHash: _ph, ...session } = u;
   setSession(session);
   return session;
@@ -112,7 +137,11 @@ export function updateProfile(input: {
   const users = loadUsers();
   const idx = users.findIndex((u) => u.id === session.id);
   if (idx === -1) throw new Error("Account not found");
-  users[idx] = { ...users[idx], fullName, phone, studentId };
+  const existingStudents = users[idx].students || [];
+  const nextStudents: StudentLink[] = existingStudents.length
+    ? [{ studentId, school: existingStudents[0]?.school || "" }, ...existingStudents.slice(1)]
+    : [{ studentId, school: "" }];
+  users[idx] = { ...users[idx], fullName, phone, studentId, students: nextStudents };
   saveUsers(users);
   const { passwordHash: _ph, ...updated } = users[idx];
   setSession(updated);
