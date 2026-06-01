@@ -137,7 +137,11 @@ export function updateProfile(input: {
   const users = loadUsers();
   const idx = users.findIndex((u) => u.id === session.id);
   if (idx === -1) throw new Error("Account not found");
-  users[idx] = { ...users[idx], fullName, phone, studentId };
+  const existingStudents = users[idx].students || [];
+  const nextStudents: StudentLink[] = existingStudents.length
+    ? [{ studentId, school: existingStudents[0]?.school || "" }, ...existingStudents.slice(1)]
+    : [{ studentId, school: "" }];
+  users[idx] = { ...users[idx], fullName, phone, studentId, students: nextStudents };
   saveUsers(users);
   const { passwordHash: _ph, ...updated } = users[idx];
   setSession(updated);
