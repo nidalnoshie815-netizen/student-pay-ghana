@@ -26,7 +26,19 @@ function GuardianAuth() {
   // signup
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [studentId, setStudentId] = useState("");
+  const [students, setStudents] = useState<StudentLink[]>([
+    { studentId: "", school: "" },
+  ]);
+
+  function updateStudent(index: number, patch: Partial<StudentLink>) {
+    setStudents((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
+  }
+  function addStudent() {
+    setStudents((prev) => [...prev, { studentId: "", school: "" }]);
+  }
+  function removeStudent(index: number) {
+    setStudents((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== index)));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,8 +48,12 @@ function GuardianAuth() {
         await signIn(email, password);
         toast.success("Welcome back");
       } else {
-        if (!fullName || !phone || !studentId) throw new Error("Please fill in all fields");
-        await signUp({ fullName, email, phone, studentId, password });
+        if (!fullName || !phone) throw new Error("Please fill in all fields");
+        const cleaned = students
+          .map((s) => ({ studentId: s.studentId.trim(), school: s.school.trim() }))
+          .filter((s) => s.studentId.length > 0);
+        if (cleaned.length === 0) throw new Error("Add at least one student ID");
+        await signUp({ fullName, email, phone, students: cleaned, password });
         toast.success("Account created");
       }
       navigate({ to: "/parent" });
