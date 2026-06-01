@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
-import { signIn, signUp } from "@/lib/guardian-auth";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { signIn, signUp, type StudentLink } from "@/lib/guardian-auth";
+import { Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/guardian/auth")({
