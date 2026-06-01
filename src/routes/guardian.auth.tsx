@@ -66,8 +66,8 @@ function GuardianAuth() {
             Stay in control of every <span className="text-primary">GH₵</span> your student spends.
           </h1>
           <p className="mt-4 text-muted-foreground">
-            Sign up once with your student's ID, then top up via MTN MoMo, Vodafone Cash,
-            Telecel Cash or AirtelTigo Money and get instant withdrawal alerts.
+            Register once with your student's ID to manage school fees, meals and supplies.
+            Pay easily with any Ghanaian mobile money network and track every cedi.
           </p>
         </section>
 
