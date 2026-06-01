@@ -1,12 +1,18 @@
 // Lightweight mock auth for guardians (parents). Stored in localStorage.
 // Replace with Lovable Cloud auth when backend is enabled.
 
+export interface StudentLink {
+  studentId: string;
+  school: string;
+}
+
 export interface Guardian {
   id: string;
   fullName: string;
   email: string;
   phone: string;
-  studentId: string; // linked student
+  studentId: string; // primary (first) student — kept for back-compat
+  students: StudentLink[];
   createdAt: number;
 }
 
