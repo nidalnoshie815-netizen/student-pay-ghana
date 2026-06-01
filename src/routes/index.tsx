@@ -52,8 +52,8 @@ function Landing() {
               <span className="text-primary">Skip the worry.</span>
             </h1>
             <p className="mt-5 max-w-md text-balance text-muted-foreground">
-              Parents top up using MTN MoMo, Vodafone, Telecel or AirtelTigo. Students withdraw
-              instantly with a secure Student ID. Everything in Ghana Cedis.
+              Support your child's education with seamless mobile money payments for fees,
+              meals and daily needs. Students access funds securely with their Student ID — all in Ghana Cedis.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
