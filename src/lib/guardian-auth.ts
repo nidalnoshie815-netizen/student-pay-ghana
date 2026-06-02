@@ -102,6 +102,43 @@ export async function signUp(input: {
   return session;
 }
 
+export async function signInWithGoogle(input?: {
+  students?: StudentLink[];
+}): Promise<Guardian> {
+  // Mock Google account — in production this would use real OAuth.
+  const mockEmail = "guardian.google@gmail.com";
+  const mockName = "Google Guardian";
+  const users = loadUsers();
+  let u = users.find((x) => x.email === mockEmail);
+  if (!u) {
+    const normalized: StudentLink[] = (input?.students || [])
+      .map((s) => ({ studentId: s.studentId.trim().toUpperCase(), school: s.school.trim() }))
+      .filter((s) => s.studentId.length > 0);
+    if (normalized.length === 0) {
+      throw new Error("Add at least one child's Student ID before continuing with Google");
+    }
+    u = {
+      id: crypto.randomUUID(),
+      fullName: mockName,
+      email: mockEmail,
+      phone: "",
+      studentId: normalized[0].studentId,
+      students: normalized,
+      createdAt: Date.now(),
+      passwordHash: await hash(crypto.randomUUID()),
+    };
+    users.push(u);
+    saveUsers(users);
+  }
+  if (!u.students || u.students.length === 0) {
+    u.students = [{ studentId: u.studentId, school: "" }];
+    saveUsers(users);
+  }
+  const { passwordHash: _ph, ...session } = u;
+  setSession(session);
+  return session;
+}
+
 export async function signIn(email: string, password: string): Promise<Guardian> {
   const users = loadUsers();
   const u = users.find((x) => x.email === email.trim().toLowerCase());
