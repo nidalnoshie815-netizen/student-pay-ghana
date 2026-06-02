@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TransactionsRouteImport } from './routes/transactions'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as AddMoneyRouteImport } from './routes/add-money'
@@ -24,6 +25,11 @@ import { Route as AddMoneyAirteltigoRouteImport } from './routes/add-money.airte
 const TransactionsRoute = TransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParentRoute = ParentRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/add-money': typeof AddMoneyRouteWithChildren
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
+  '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/add-money': typeof AddMoneyRouteWithChildren
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
+  '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/add-money': typeof AddMoneyRouteWithChildren
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
+  '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/add-money'
     | '/insights'
     | '/parent'
+    | '/settings'
     | '/transactions'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/add-money'
     | '/insights'
     | '/parent'
+    | '/settings'
     | '/transactions'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/add-money'
     | '/insights'
     | '/parent'
+    | '/settings'
     | '/transactions'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
@@ -164,6 +176,7 @@ export interface RootRouteChildren {
   AddMoneyRoute: typeof AddMoneyRouteWithChildren
   InsightsRoute: typeof InsightsRoute
   ParentRoute: typeof ParentRoute
+  SettingsRoute: typeof SettingsRoute
   TransactionsRoute: typeof TransactionsRoute
   GuardianAuthRoute: typeof GuardianAuthRoute
   GuardianForgotPasswordRoute: typeof GuardianForgotPasswordRoute
@@ -177,6 +190,13 @@ declare module '@tanstack/react-router' {
       path: '/transactions'
       fullPath: '/transactions'
       preLoaderRoute: typeof TransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parent': {
@@ -273,6 +293,7 @@ const rootRouteChildren: RootRouteChildren = {
   AddMoneyRoute: AddMoneyRouteWithChildren,
   InsightsRoute: InsightsRoute,
   ParentRoute: ParentRoute,
+  SettingsRoute: SettingsRoute,
   TransactionsRoute: TransactionsRoute,
   GuardianAuthRoute: GuardianAuthRoute,
   GuardianForgotPasswordRoute: GuardianForgotPasswordRoute,
@@ -281,3 +302,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
