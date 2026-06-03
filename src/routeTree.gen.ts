@@ -15,6 +15,16 @@ import { Route as ParentRouteImport } from './routes/parent'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as AddMoneyRouteImport } from './routes/add-money'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings.index'
+import { Route as SettingsTermsRouteImport } from './routes/settings.terms'
+import { Route as SettingsSchoolRouteImport } from './routes/settings.school'
+import { Route as SettingsPrivacyRouteImport } from './routes/settings.privacy'
+import { Route as SettingsLanguageRouteImport } from './routes/settings.language'
+import { Route as SettingsHelpRouteImport } from './routes/settings.help'
+import { Route as SettingsFeedbackRouteImport } from './routes/settings.feedback'
+import { Route as SettingsContactRouteImport } from './routes/settings.contact'
+import { Route as SettingsChangePinRouteImport } from './routes/settings.change-pin'
+import { Route as SettingsChangePasswordRouteImport } from './routes/settings.change-password'
 import { Route as GuardianProfileRouteImport } from './routes/guardian.profile'
 import { Route as GuardianForgotPasswordRouteImport } from './routes/guardian.forgot-password'
 import { Route as GuardianAuthRouteImport } from './routes/guardian.auth'
@@ -52,6 +62,56 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsTermsRoute = SettingsTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsSchoolRoute = SettingsSchoolRouteImport.update({
+  id: '/school',
+  path: '/school',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsPrivacyRoute = SettingsPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsLanguageRoute = SettingsLanguageRouteImport.update({
+  id: '/language',
+  path: '/language',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsHelpRoute = SettingsHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsFeedbackRoute = SettingsFeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsContactRoute = SettingsContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsChangePinRoute = SettingsChangePinRouteImport.update({
+  id: '/change-pin',
+  path: '/change-pin',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsChangePasswordRoute = SettingsChangePasswordRouteImport.update({
+  id: '/change-password',
+  path: '/change-password',
+  getParentRoute: () => SettingsRoute,
+} as any)
 const GuardianProfileRoute = GuardianProfileRouteImport.update({
   id: '/guardian/profile',
   path: '/guardian/profile',
@@ -88,7 +148,7 @@ export interface FileRoutesByFullPath {
   '/add-money': typeof AddMoneyRouteWithChildren
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
-  '/settings': typeof SettingsRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/transactions': typeof TransactionsRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
@@ -96,13 +156,22 @@ export interface FileRoutesByFullPath {
   '/guardian/auth': typeof GuardianAuthRoute
   '/guardian/forgot-password': typeof GuardianForgotPasswordRoute
   '/guardian/profile': typeof GuardianProfileRoute
+  '/settings/change-password': typeof SettingsChangePasswordRoute
+  '/settings/change-pin': typeof SettingsChangePinRoute
+  '/settings/contact': typeof SettingsContactRoute
+  '/settings/feedback': typeof SettingsFeedbackRoute
+  '/settings/help': typeof SettingsHelpRoute
+  '/settings/language': typeof SettingsLanguageRoute
+  '/settings/privacy': typeof SettingsPrivacyRoute
+  '/settings/school': typeof SettingsSchoolRoute
+  '/settings/terms': typeof SettingsTermsRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/add-money': typeof AddMoneyRouteWithChildren
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
-  '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
@@ -110,6 +179,16 @@ export interface FileRoutesByTo {
   '/guardian/auth': typeof GuardianAuthRoute
   '/guardian/forgot-password': typeof GuardianForgotPasswordRoute
   '/guardian/profile': typeof GuardianProfileRoute
+  '/settings/change-password': typeof SettingsChangePasswordRoute
+  '/settings/change-pin': typeof SettingsChangePinRoute
+  '/settings/contact': typeof SettingsContactRoute
+  '/settings/feedback': typeof SettingsFeedbackRoute
+  '/settings/help': typeof SettingsHelpRoute
+  '/settings/language': typeof SettingsLanguageRoute
+  '/settings/privacy': typeof SettingsPrivacyRoute
+  '/settings/school': typeof SettingsSchoolRoute
+  '/settings/terms': typeof SettingsTermsRoute
+  '/settings': typeof SettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -117,7 +196,7 @@ export interface FileRoutesById {
   '/add-money': typeof AddMoneyRouteWithChildren
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
-  '/settings': typeof SettingsRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/transactions': typeof TransactionsRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
@@ -125,6 +204,16 @@ export interface FileRoutesById {
   '/guardian/auth': typeof GuardianAuthRoute
   '/guardian/forgot-password': typeof GuardianForgotPasswordRoute
   '/guardian/profile': typeof GuardianProfileRoute
+  '/settings/change-password': typeof SettingsChangePasswordRoute
+  '/settings/change-pin': typeof SettingsChangePinRoute
+  '/settings/contact': typeof SettingsContactRoute
+  '/settings/feedback': typeof SettingsFeedbackRoute
+  '/settings/help': typeof SettingsHelpRoute
+  '/settings/language': typeof SettingsLanguageRoute
+  '/settings/privacy': typeof SettingsPrivacyRoute
+  '/settings/school': typeof SettingsSchoolRoute
+  '/settings/terms': typeof SettingsTermsRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,13 +230,22 @@ export interface FileRouteTypes {
     | '/guardian/auth'
     | '/guardian/forgot-password'
     | '/guardian/profile'
+    | '/settings/change-password'
+    | '/settings/change-pin'
+    | '/settings/contact'
+    | '/settings/feedback'
+    | '/settings/help'
+    | '/settings/language'
+    | '/settings/privacy'
+    | '/settings/school'
+    | '/settings/terms'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/add-money'
     | '/insights'
     | '/parent'
-    | '/settings'
     | '/transactions'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
@@ -155,6 +253,16 @@ export interface FileRouteTypes {
     | '/guardian/auth'
     | '/guardian/forgot-password'
     | '/guardian/profile'
+    | '/settings/change-password'
+    | '/settings/change-pin'
+    | '/settings/contact'
+    | '/settings/feedback'
+    | '/settings/help'
+    | '/settings/language'
+    | '/settings/privacy'
+    | '/settings/school'
+    | '/settings/terms'
+    | '/settings'
   id:
     | '__root__'
     | '/'
@@ -169,6 +277,16 @@ export interface FileRouteTypes {
     | '/guardian/auth'
     | '/guardian/forgot-password'
     | '/guardian/profile'
+    | '/settings/change-password'
+    | '/settings/change-pin'
+    | '/settings/contact'
+    | '/settings/feedback'
+    | '/settings/help'
+    | '/settings/language'
+    | '/settings/privacy'
+    | '/settings/school'
+    | '/settings/terms'
+    | '/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -176,7 +294,7 @@ export interface RootRouteChildren {
   AddMoneyRoute: typeof AddMoneyRouteWithChildren
   InsightsRoute: typeof InsightsRoute
   ParentRoute: typeof ParentRoute
-  SettingsRoute: typeof SettingsRoute
+  SettingsRoute: typeof SettingsRouteWithChildren
   TransactionsRoute: typeof TransactionsRoute
   GuardianAuthRoute: typeof GuardianAuthRoute
   GuardianForgotPasswordRoute: typeof GuardianForgotPasswordRoute
@@ -226,6 +344,76 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/settings/': {
+      id: '/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/terms': {
+      id: '/settings/terms'
+      path: '/terms'
+      fullPath: '/settings/terms'
+      preLoaderRoute: typeof SettingsTermsRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/school': {
+      id: '/settings/school'
+      path: '/school'
+      fullPath: '/settings/school'
+      preLoaderRoute: typeof SettingsSchoolRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/privacy': {
+      id: '/settings/privacy'
+      path: '/privacy'
+      fullPath: '/settings/privacy'
+      preLoaderRoute: typeof SettingsPrivacyRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/language': {
+      id: '/settings/language'
+      path: '/language'
+      fullPath: '/settings/language'
+      preLoaderRoute: typeof SettingsLanguageRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/help': {
+      id: '/settings/help'
+      path: '/help'
+      fullPath: '/settings/help'
+      preLoaderRoute: typeof SettingsHelpRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/feedback': {
+      id: '/settings/feedback'
+      path: '/feedback'
+      fullPath: '/settings/feedback'
+      preLoaderRoute: typeof SettingsFeedbackRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/contact': {
+      id: '/settings/contact'
+      path: '/contact'
+      fullPath: '/settings/contact'
+      preLoaderRoute: typeof SettingsContactRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/change-pin': {
+      id: '/settings/change-pin'
+      path: '/change-pin'
+      fullPath: '/settings/change-pin'
+      preLoaderRoute: typeof SettingsChangePinRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/change-password': {
+      id: '/settings/change-password'
+      path: '/change-password'
+      fullPath: '/settings/change-password'
+      preLoaderRoute: typeof SettingsChangePasswordRouteImport
+      parentRoute: typeof SettingsRoute
     }
     '/guardian/profile': {
       id: '/guardian/profile'
@@ -288,12 +476,42 @@ const AddMoneyRouteWithChildren = AddMoneyRoute._addFileChildren(
   AddMoneyRouteChildren,
 )
 
+interface SettingsRouteChildren {
+  SettingsChangePasswordRoute: typeof SettingsChangePasswordRoute
+  SettingsChangePinRoute: typeof SettingsChangePinRoute
+  SettingsContactRoute: typeof SettingsContactRoute
+  SettingsFeedbackRoute: typeof SettingsFeedbackRoute
+  SettingsHelpRoute: typeof SettingsHelpRoute
+  SettingsLanguageRoute: typeof SettingsLanguageRoute
+  SettingsPrivacyRoute: typeof SettingsPrivacyRoute
+  SettingsSchoolRoute: typeof SettingsSchoolRoute
+  SettingsTermsRoute: typeof SettingsTermsRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
+}
+
+const SettingsRouteChildren: SettingsRouteChildren = {
+  SettingsChangePasswordRoute: SettingsChangePasswordRoute,
+  SettingsChangePinRoute: SettingsChangePinRoute,
+  SettingsContactRoute: SettingsContactRoute,
+  SettingsFeedbackRoute: SettingsFeedbackRoute,
+  SettingsHelpRoute: SettingsHelpRoute,
+  SettingsLanguageRoute: SettingsLanguageRoute,
+  SettingsPrivacyRoute: SettingsPrivacyRoute,
+  SettingsSchoolRoute: SettingsSchoolRoute,
+  SettingsTermsRoute: SettingsTermsRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
+}
+
+const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
+  SettingsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AddMoneyRoute: AddMoneyRouteWithChildren,
   InsightsRoute: InsightsRoute,
   ParentRoute: ParentRoute,
-  SettingsRoute: SettingsRoute,
+  SettingsRoute: SettingsRouteWithChildren,
   TransactionsRoute: TransactionsRoute,
   GuardianAuthRoute: GuardianAuthRoute,
   GuardianForgotPasswordRoute: GuardianForgotPasswordRoute,
