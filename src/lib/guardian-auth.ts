@@ -1,6 +1,59 @@
 // Lightweight mock auth for guardians (parents). Stored in localStorage.
 // Replace with Lovable Cloud auth when backend is enabled.
 
+const PIN_KEY = "studentpay_guardian_pin_v1";
+
+export function getPin(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(PIN_KEY);
+}
+
+export async function changePin(input: { currentPin?: string; newPin: string }): Promise<void> {
+  const existing = getPin();
+  if (existing && input.currentPin !== existing) {
+    throw new Error("Current PIN is incorrect");
+  }
+  if (!/^\d{4}$/.test(input.newPin)) throw new Error("PIN must be 4 digits");
+  localStorage.setItem(PIN_KEY, input.newPin);
+}
+
+export function updateStudents(students: StudentLink[]): Guardian {
+  const session = getSession();
+  if (!session) throw new Error("Not signed in");
+  const normalized: StudentLink[] = students
+    .map((s) => ({ studentId: s.studentId.trim().toUpperCase(), school: s.school.trim() }))
+    .filter((s) => s.studentId.length > 0);
+  if (normalized.length === 0) throw new Error("Add at least one student");
+  const users = loadUsers();
+  const idx = users.findIndex((u) => u.id === session.id);
+  if (idx === -1) throw new Error("Account not found");
+  users[idx] = {
+    ...users[idx],
+    students: normalized,
+    studentId: normalized[0].studentId,
+  };
+  saveUsers(users);
+  const { passwordHash: _ph, ...updated } = users[idx];
+  setSession(updated);
+  return updated;
+}
+
+export async function changePassword(input: {
+  currentPassword: string;
+  newPassword: string;
+}): Promise<void> {
+  const session = getSession();
+  if (!session) throw new Error("Not signed in");
+  if (input.newPassword.length < 6) throw new Error("Password must be at least 6 characters");
+  const users = loadUsers();
+  const idx = users.findIndex((u) => u.id === session.id);
+  if (idx === -1) throw new Error("Account not found");
+  const currentHash = await hash(input.currentPassword);
+  if (currentHash !== users[idx].passwordHash) throw new Error("Current password is incorrect");
+  users[idx].passwordHash = await hash(input.newPassword);
+  saveUsers(users);
+}
+
 export interface StudentLink {
   studentId: string;
   school: string;

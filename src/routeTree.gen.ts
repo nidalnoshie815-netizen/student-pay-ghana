@@ -15,6 +15,7 @@ import { Route as ParentRouteImport } from './routes/parent'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as AddMoneyRouteImport } from './routes/add-money'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings.index'
 import { Route as SettingsTermsRouteImport } from './routes/settings.terms'
 import { Route as SettingsSchoolRouteImport } from './routes/settings.school'
 import { Route as SettingsPrivacyRouteImport } from './routes/settings.privacy'
@@ -60,6 +61,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SettingsRoute,
 } as any)
 const SettingsTermsRoute = SettingsTermsRouteImport.update({
   id: '/terms',
@@ -159,13 +165,13 @@ export interface FileRoutesByFullPath {
   '/settings/privacy': typeof SettingsPrivacyRoute
   '/settings/school': typeof SettingsSchoolRoute
   '/settings/terms': typeof SettingsTermsRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/add-money': typeof AddMoneyRouteWithChildren
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
-  '/settings': typeof SettingsRouteWithChildren
   '/transactions': typeof TransactionsRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
@@ -182,6 +188,7 @@ export interface FileRoutesByTo {
   '/settings/privacy': typeof SettingsPrivacyRoute
   '/settings/school': typeof SettingsSchoolRoute
   '/settings/terms': typeof SettingsTermsRoute
+  '/settings': typeof SettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -206,6 +213,7 @@ export interface FileRoutesById {
   '/settings/privacy': typeof SettingsPrivacyRoute
   '/settings/school': typeof SettingsSchoolRoute
   '/settings/terms': typeof SettingsTermsRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -231,13 +239,13 @@ export interface FileRouteTypes {
     | '/settings/privacy'
     | '/settings/school'
     | '/settings/terms'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/add-money'
     | '/insights'
     | '/parent'
-    | '/settings'
     | '/transactions'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
@@ -254,6 +262,7 @@ export interface FileRouteTypes {
     | '/settings/privacy'
     | '/settings/school'
     | '/settings/terms'
+    | '/settings'
   id:
     | '__root__'
     | '/'
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/settings/privacy'
     | '/settings/school'
     | '/settings/terms'
+    | '/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -334,6 +344,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/settings/': {
+      id: '/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof SettingsRoute
     }
     '/settings/terms': {
       id: '/settings/terms'
@@ -469,6 +486,7 @@ interface SettingsRouteChildren {
   SettingsPrivacyRoute: typeof SettingsPrivacyRoute
   SettingsSchoolRoute: typeof SettingsSchoolRoute
   SettingsTermsRoute: typeof SettingsTermsRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
 const SettingsRouteChildren: SettingsRouteChildren = {
@@ -481,6 +499,7 @@ const SettingsRouteChildren: SettingsRouteChildren = {
   SettingsPrivacyRoute: SettingsPrivacyRoute,
   SettingsSchoolRoute: SettingsSchoolRoute,
   SettingsTermsRoute: SettingsTermsRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
 }
 
 const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
@@ -501,3 +520,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
