@@ -158,12 +158,12 @@ function SettingsPage() {
         <Section title="Account" emoji="👤">
           <Row icon={User} label="Edit Profile" to="/guardian/profile" />
           <Row icon={IdCard} label="Student ID" to="/guardian/profile" />
-          <Row icon={School} label="School Information" onClick={soon("School information")} />
+          <Row icon={School} label="School Information" to="/settings/school" />
         </Section>
 
         <Section title="Security" emoji="🔒">
-          <Row icon={Lock} label="Change Password" onClick={soon("Change password")} />
-          <Row icon={KeyRound} label="Change PIN" onClick={soon("Change PIN")} />
+          <Row icon={Lock} label="Change Password" to="/settings/change-password" />
+          <Row icon={KeyRound} label="Change PIN" to="/settings/change-pin" />
           <Row
             icon={Fingerprint}
             label="Biometric Login"
@@ -195,20 +195,26 @@ function SettingsPage() {
             label="Dark Mode"
             right={<Toggle checked={darkMode} onChange={setDarkMode} />}
           />
-          <Row icon={Languages} label="Language" right={<span className="text-xs text-muted-foreground">English</span>} onClick={soon("Language")} />
+          <Row
+            icon={Languages}
+            label="Language"
+            to="/settings/language"
+            right={<span className="text-xs text-muted-foreground">English</span>}
+          />
         </Section>
 
         <Section title="Help & Support" emoji="❓">
-          <Row icon={HelpCircle} label="Help Center" onClick={soon("Help center")} />
-          <Row icon={LifeBuoy} label="Contact Support" onClick={soon("Contact support")} />
-          <Row icon={MessageSquare} label="Send Feedback" onClick={soon("Feedback")} />
+          <Row icon={HelpCircle} label="Help Center" to="/settings/help" />
+          <Row icon={LifeBuoy} label="Contact Support" to="/settings/contact" />
+          <Row icon={MessageSquare} label="Send Feedback" to="/settings/feedback" />
         </Section>
 
         <Section title="About" emoji="📜">
-          <Row icon={FileText} label="Terms & Conditions" onClick={soon("Terms")} />
-          <Row icon={ShieldCheck} label="Privacy Policy" onClick={soon("Privacy")} />
+          <Row icon={FileText} label="Terms & Conditions" to="/settings/terms" />
+          <Row icon={ShieldCheck} label="Privacy Policy" to="/settings/privacy" />
           <Row icon={Info} label="App Version" right={<span className="text-xs text-muted-foreground">1.0.0</span>} />
         </Section>
+
 
         <Section title="Account" emoji="🚪">
           <Row
