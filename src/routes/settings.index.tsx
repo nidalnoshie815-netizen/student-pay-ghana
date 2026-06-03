@@ -135,9 +135,6 @@ function SettingsPage() {
 
   if (!guardian) return null;
 
-  void soon;
-  const _unused = (label: string) => () => toast.info(`${label} — coming soon`);
-  void _unused;
 
   return (
     <div className="relative min-h-screen overflow-hidden pb-24">
