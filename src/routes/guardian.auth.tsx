@@ -82,8 +82,7 @@ function GuardianAuth() {
             Stay in control of every <span className="text-primary">GH₵</span> your student spends.
           </h1>
           <p className="mt-4 text-muted-foreground">
-            Register once with your student's ID to manage school fees, meals and supplies.
-            Pay easily with any Ghanaian mobile money network and track every cedi.
+            Send, receive, spend, and track your money with ease. Student Pay connects students, parents, and schools through secure digital payments.
           </p>
         </section>
 
