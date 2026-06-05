@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
-import { signIn, signInWithGoogle, signUp, type StudentLink } from "@/lib/guardian-auth";
+import { completeGoogleSignIn, signIn, signInWithGoogle, signUp, type StudentLink } from "@/lib/guardian-auth";
 import { Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +39,25 @@ function GuardianAuth() {
   function removeStudent(index: number) {
     setStudents((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== index)));
   }
+
+  // Complete Google sign-in when we land back here from the OAuth redirect.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const session = await completeGoogleSignIn();
+        if (!cancelled && session) {
+          toast.success("Signed in with Google");
+          navigate({ to: "/parent" });
+        }
+      } catch (err) {
+        if (!cancelled) toast.error(err instanceof Error ? err.message : "Google sign-in failed");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -254,10 +273,11 @@ function GuardianAuth() {
                         .filter((s) => s.studentId.length > 0)
                     : undefined;
                 await signInWithGoogle(cleaned ? { students: cleaned } : undefined);
-                toast.success("Signed in with Google");
-                navigate({ to: "/parent" });
+                // Browser is redirecting to Google — no toast needed here.
               } catch (err) {
-                toast.error(err instanceof Error ? err.message : "Google sign-in failed");
+                const msg = err instanceof Error ? err.message : "Google sign-in failed";
+                if (msg.startsWith("Redirecting")) return;
+                toast.error(msg);
               } finally {
                 setLoading(false);
               }
