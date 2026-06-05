@@ -40,6 +40,25 @@ function GuardianAuth() {
     setStudents((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== index)));
   }
 
+  // Complete Google sign-in when we land back here from the OAuth redirect.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const session = await completeGoogleSignIn();
+        if (!cancelled && session) {
+          toast.success("Signed in with Google");
+          navigate({ to: "/parent" });
+        }
+      } catch (err) {
+        if (!cancelled) toast.error(err instanceof Error ? err.message : "Google sign-in failed");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
