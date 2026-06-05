@@ -273,10 +273,11 @@ function GuardianAuth() {
                         .filter((s) => s.studentId.length > 0)
                     : undefined;
                 await signInWithGoogle(cleaned ? { students: cleaned } : undefined);
-                toast.success("Signed in with Google");
-                navigate({ to: "/parent" });
+                // Browser is redirecting to Google — no toast needed here.
               } catch (err) {
-                toast.error(err instanceof Error ? err.message : "Google sign-in failed");
+                const msg = err instanceof Error ? err.message : "Google sign-in failed";
+                if (msg.startsWith("Redirecting")) return;
+                toast.error(msg);
               } finally {
                 setLoading(false);
               }
