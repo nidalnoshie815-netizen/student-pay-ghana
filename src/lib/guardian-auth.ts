@@ -155,26 +155,71 @@ export async function signUp(input: {
   return session;
 }
 
+const PENDING_STUDENTS_KEY = "studentpay_pending_students_v1";
+
+export function savePendingStudents(students: StudentLink[]) {
+  localStorage.setItem(PENDING_STUDENTS_KEY, JSON.stringify(students));
+}
+export function loadPendingStudents(): StudentLink[] {
+  try {
+    return JSON.parse(localStorage.getItem(PENDING_STUDENTS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+export function clearPendingStudents() {
+  localStorage.removeItem(PENDING_STUDENTS_KEY);
+}
+
 export async function signInWithGoogle(input?: {
   students?: StudentLink[];
 }): Promise<Guardian> {
-  // Mock Google account — in production this would use real OAuth.
-  const mockEmail = "guardian.google@gmail.com";
-  const mockName = "Google Guardian";
+  const { lovable } = await import("@/integrations/lovable");
+  if (input?.students && input.students.length) {
+    savePendingStudents(input.students);
+  }
+  const result = await lovable.auth.signInWithOAuth("google", {
+    redirect_uri: window.location.origin + "/guardian/auth",
+  });
+  if (result.error) {
+    clearPendingStudents();
+    throw result.error instanceof Error ? result.error : new Error(String(result.error));
+  }
+  // If redirected === true, the browser is navigating away; throw to halt UI.
+  throw new Error("Redirecting to Google…");
+}
+
+// Called by the auth page after returning from Google OAuth. Creates a
+// guardian record from the Supabase session if needed.
+export async function completeGoogleSignIn(): Promise<Guardian | null> {
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data } = await supabase.auth.getUser();
+  const sUser = data.user;
+  if (!sUser?.email) return null;
+
+  const email = sUser.email.toLowerCase();
+  const fullName =
+    (sUser.user_metadata?.full_name as string) ||
+    (sUser.user_metadata?.name as string) ||
+    email.split("@")[0];
+
   const users = loadUsers();
-  let u = users.find((x) => x.email === mockEmail);
+  let u = users.find((x) => x.email === email);
   if (!u) {
-    const normalized: StudentLink[] = (input?.students || [])
+    const pending = loadPendingStudents();
+    const normalized: StudentLink[] = pending
       .map((s) => ({ studentId: s.studentId.trim().toUpperCase(), school: s.school.trim() }))
       .filter((s) => s.studentId.length > 0);
     if (normalized.length === 0) {
+      // No students captured before redirect — sign out of supabase to keep state clean.
+      await supabase.auth.signOut();
       throw new Error("Add at least one child's Student ID before continuing with Google");
     }
     u = {
-      id: crypto.randomUUID(),
-      fullName: mockName,
-      email: mockEmail,
-      phone: "",
+      id: sUser.id,
+      fullName,
+      email,
+      phone: (sUser.user_metadata?.phone as string) || "",
       studentId: normalized[0].studentId,
       students: normalized,
       createdAt: Date.now(),
@@ -183,6 +228,7 @@ export async function signInWithGoogle(input?: {
     users.push(u);
     saveUsers(users);
   }
+  clearPendingStudents();
   if (!u.students || u.students.length === 0) {
     u.students = [{ studentId: u.studentId, school: "" }];
     saveUsers(users);
