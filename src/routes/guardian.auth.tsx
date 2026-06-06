@@ -19,6 +19,7 @@ function GuardianAuth() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // shared
   const [email, setEmail] = useState("");
