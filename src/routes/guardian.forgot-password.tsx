@@ -21,6 +21,7 @@ function ForgotPassword() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("request");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
