@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
 import { requestPasswordReset, resetPassword } from "@/lib/guardian-auth";
-import { KeyRound, Loader2, Mail, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Loader2, Mail, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/guardian/forgot-password")({
