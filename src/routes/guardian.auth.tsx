@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { completeGoogleSignIn, signIn, signInWithGoogle, signUp, type StudentLink } from "@/lib/guardian-auth";
-import { Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/guardian/auth")({
