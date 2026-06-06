@@ -29,8 +29,20 @@ function ChangePasswordPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!current) {
+      toast.error("Enter your current password to continue");
+      return;
+    }
+    if (next.length < 6) {
+      toast.error("New password must be at least 6 characters");
+      return;
+    }
     if (next !== confirm) {
       toast.error("New passwords do not match");
+      return;
+    }
+    if (next === current) {
+      toast.error("New password must be different from current password");
       return;
     }
     setSaving(true);
@@ -48,15 +60,23 @@ function ChangePasswordPage() {
   }
 
   return (
-    <SettingsPageShell title="Change Password" subtitle="Use at least 6 characters.">
+    <SettingsPageShell
+      title="Change Password"
+      subtitle="Re-enter your current password to confirm it's you, then choose a new one (at least 6 characters)."
+    >
       <form onSubmit={handleSubmit}>
         <SettingsCard>
-          <label className="text-xs font-medium text-muted-foreground">Current password</label>
+          <label className="text-xs font-medium text-muted-foreground">
+            Current password <span className="text-destructive">*</span>
+          </label>
           <input
             type="password"
             value={current}
             onChange={(e) => setCurrent(e.target.value)}
             className="input-field mt-1"
+            autoComplete="current-password"
+            placeholder="Required to confirm it's you"
+            required
           />
           <label className="mt-4 block text-xs font-medium text-muted-foreground">
             New password
@@ -66,6 +86,9 @@ function ChangePasswordPage() {
             value={next}
             onChange={(e) => setNext(e.target.value)}
             className="input-field mt-1"
+            autoComplete="new-password"
+            required
+            minLength={6}
           />
           <label className="mt-4 block text-xs font-medium text-muted-foreground">
             Confirm new password
@@ -75,6 +98,9 @@ function ChangePasswordPage() {
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             className="input-field mt-1"
+            autoComplete="new-password"
+            required
+            minLength={6}
           />
         </SettingsCard>
 
