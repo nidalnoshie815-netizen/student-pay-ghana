@@ -57,6 +57,8 @@ export async function changePassword(input: {
 export interface StudentLink {
   studentId: string;
   school: string;
+  name?: string;
+  grade?: string;
 }
 
 export interface Guardian {
@@ -67,6 +69,13 @@ export interface Guardian {
   studentId: string; // primary (first) student — kept for back-compat
   students: StudentLink[];
   createdAt: number;
+  avatarDataUrl?: string;
+  address?: string;
+  occupation?: string;
+  emergencyName?: string;
+  emergencyPhone?: string;
+  preferredLanguage?: string;
+  dateOfBirth?: string;
 }
 
 interface StoredGuardian extends Guardian {
@@ -278,6 +287,67 @@ export function updateProfile(input: {
     ? [{ studentId, school: existingStudents[0]?.school || "" }, ...existingStudents.slice(1)]
     : [{ studentId, school: "" }];
   users[idx] = { ...users[idx], fullName, phone, studentId, students: nextStudents };
+  saveUsers(users);
+  const { passwordHash: _ph, ...updated } = users[idx];
+  setSession(updated);
+  return updated;
+}
+
+export type ProfileExtras = Partial<
+  Pick<
+    Guardian,
+    | "avatarDataUrl"
+    | "address"
+    | "occupation"
+    | "emergencyName"
+    | "emergencyPhone"
+    | "preferredLanguage"
+    | "dateOfBirth"
+  >
+> & { students?: StudentLink[] };
+
+export function updateProfileFull(
+  input: {
+    fullName: string;
+    phone: string;
+  } & ProfileExtras,
+): Guardian {
+  const session = getSession();
+  if (!session) throw new Error("Not signed in");
+  const fullName = input.fullName.trim();
+  const phone = input.phone.trim();
+  if (!fullName) throw new Error("Full name is required");
+  const users = loadUsers();
+  const idx = users.findIndex((u) => u.id === session.id);
+  if (idx === -1) throw new Error("Account not found");
+
+  let nextStudents = users[idx].students || [];
+  if (input.students) {
+    nextStudents = input.students
+      .map((s) => ({
+        studentId: s.studentId.trim().toUpperCase(),
+        school: (s.school || "").trim(),
+        name: s.name?.trim() || undefined,
+        grade: s.grade?.trim() || undefined,
+      }))
+      .filter((s) => s.studentId.length > 0);
+    if (nextStudents.length === 0) throw new Error("Add at least one child");
+  }
+
+  users[idx] = {
+    ...users[idx],
+    fullName,
+    phone,
+    students: nextStudents,
+    studentId: nextStudents[0]?.studentId || users[idx].studentId,
+    avatarDataUrl: input.avatarDataUrl ?? users[idx].avatarDataUrl,
+    address: input.address ?? users[idx].address,
+    occupation: input.occupation ?? users[idx].occupation,
+    emergencyName: input.emergencyName ?? users[idx].emergencyName,
+    emergencyPhone: input.emergencyPhone ?? users[idx].emergencyPhone,
+    preferredLanguage: input.preferredLanguage ?? users[idx].preferredLanguage,
+    dateOfBirth: input.dateOfBirth ?? users[idx].dateOfBirth,
+  };
   saveUsers(users);
   const { passwordHash: _ph, ...updated } = users[idx];
   setSession(updated);
