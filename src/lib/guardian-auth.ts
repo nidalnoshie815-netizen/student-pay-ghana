@@ -293,6 +293,67 @@ export function updateProfile(input: {
   return updated;
 }
 
+export type ProfileExtras = Partial<
+  Pick<
+    Guardian,
+    | "avatarDataUrl"
+    | "address"
+    | "occupation"
+    | "emergencyName"
+    | "emergencyPhone"
+    | "preferredLanguage"
+    | "dateOfBirth"
+  >
+> & { students?: StudentLink[] };
+
+export function updateProfileFull(
+  input: {
+    fullName: string;
+    phone: string;
+  } & ProfileExtras,
+): Guardian {
+  const session = getSession();
+  if (!session) throw new Error("Not signed in");
+  const fullName = input.fullName.trim();
+  const phone = input.phone.trim();
+  if (!fullName) throw new Error("Full name is required");
+  const users = loadUsers();
+  const idx = users.findIndex((u) => u.id === session.id);
+  if (idx === -1) throw new Error("Account not found");
+
+  let nextStudents = users[idx].students || [];
+  if (input.students) {
+    nextStudents = input.students
+      .map((s) => ({
+        studentId: s.studentId.trim().toUpperCase(),
+        school: (s.school || "").trim(),
+        name: s.name?.trim() || undefined,
+        grade: s.grade?.trim() || undefined,
+      }))
+      .filter((s) => s.studentId.length > 0);
+    if (nextStudents.length === 0) throw new Error("Add at least one child");
+  }
+
+  users[idx] = {
+    ...users[idx],
+    fullName,
+    phone,
+    students: nextStudents,
+    studentId: nextStudents[0]?.studentId || users[idx].studentId,
+    avatarDataUrl: input.avatarDataUrl ?? users[idx].avatarDataUrl,
+    address: input.address ?? users[idx].address,
+    occupation: input.occupation ?? users[idx].occupation,
+    emergencyName: input.emergencyName ?? users[idx].emergencyName,
+    emergencyPhone: input.emergencyPhone ?? users[idx].emergencyPhone,
+    preferredLanguage: input.preferredLanguage ?? users[idx].preferredLanguage,
+    dateOfBirth: input.dateOfBirth ?? users[idx].dateOfBirth,
+  };
+  saveUsers(users);
+  const { passwordHash: _ph, ...updated } = users[idx];
+  setSession(updated);
+  return updated;
+}
+
 // ---------- Password reset (mock OTP) ----------
 // Since there's no backend yet, the OTP is generated locally and shown to the
 // user (simulating the email). Stored with an expiry in localStorage.
