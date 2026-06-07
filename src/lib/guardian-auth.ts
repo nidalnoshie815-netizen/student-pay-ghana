@@ -57,6 +57,8 @@ export async function changePassword(input: {
 export interface StudentLink {
   studentId: string;
   school: string;
+  name?: string;
+  grade?: string;
 }
 
 export interface Guardian {
@@ -67,6 +69,13 @@ export interface Guardian {
   studentId: string; // primary (first) student — kept for back-compat
   students: StudentLink[];
   createdAt: number;
+  avatarDataUrl?: string;
+  address?: string;
+  occupation?: string;
+  emergencyName?: string;
+  emergencyPhone?: string;
+  preferredLanguage?: string;
+  dateOfBirth?: string;
 }
 
 interface StoredGuardian extends Guardian {
