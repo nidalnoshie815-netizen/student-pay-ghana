@@ -24,8 +24,10 @@ import {
   Wallet,
   Send,
   Store,
+  QrCode,
 } from "lucide-react";
 import { toast } from "sonner";
+import { QRCodeCanvas } from "qrcode.react";
 
 export const Route = createFileRoute("/parent")({
   head: () => ({
