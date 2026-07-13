@@ -107,6 +107,11 @@ function ParentDashboard() {
           </div>
         </section>
 
+        {/* Wallet QR - prominent */}
+        <section className="mt-5">
+          <WalletQRCard studentId={account.studentId} studentName={account.studentName} />
+        </section>
+
         {/* Quick actions */}
         <section className="mt-5">
           <QuickActions onWithdraw={() => setWithdrawOpen(true)} />
