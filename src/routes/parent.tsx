@@ -11,6 +11,7 @@ import {
 } from "@/lib/mock-store";
 import { useStore } from "@/hooks/use-store";
 import { useGuardian } from "@/hooks/use-guardian";
+import { WalletQRCard } from "@/components/WalletQRCard";
 import { signOut } from "@/lib/guardian-auth";
 import { generateAIAlerts, type AlertLevel } from "@/lib/ai-alerts";
 import {
@@ -104,6 +105,11 @@ function ParentDashboard() {
               <div className="font-mono tracking-wider">{account.studentId}</div>
             </div>
           </div>
+        </section>
+
+        {/* Wallet QR - prominent */}
+        <section className="mt-5">
+          <WalletQRCard studentId={account.studentId} studentName={account.studentName} />
         </section>
 
         {/* Quick actions */}
