@@ -11,6 +11,7 @@ import {
 } from "@/lib/mock-store";
 import { useStore } from "@/hooks/use-store";
 import { useGuardian } from "@/hooks/use-guardian";
+import { WalletQRCard } from "@/components/WalletQRCard";
 import { signOut } from "@/lib/guardian-auth";
 import { generateAIAlerts, type AlertLevel } from "@/lib/ai-alerts";
 import {
