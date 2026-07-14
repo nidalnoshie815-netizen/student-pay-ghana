@@ -20,6 +20,7 @@ export const Route = createFileRoute("/guardian/auth")({
 function GuardianAuth() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [role, setRole] = useState<Role>("parent");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -29,9 +30,13 @@ function GuardianAuth() {
   // signup
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [businessName, setBusinessName] = useState("");
   const [students, setStudents] = useState<StudentLink[]>([
     { studentId: "", school: "" },
   ]);
+
+  // Seed default admin once so the platform always has one.
+  useEffect(() => { void ensureAdminSeed(); }, []);
 
   function updateStudent(index: number, patch: Partial<StudentLink>) {
     setStudents((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
@@ -43,6 +48,10 @@ function GuardianAuth() {
     setStudents((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== index)));
   }
 
+  function goToDashboard(r: Role | undefined) {
+    navigate({ to: DASHBOARD_BY_ROLE[(r as Role) || "parent"] });
+  }
+
   // Complete Google sign-in when we land back here from the OAuth redirect.
   useEffect(() => {
     let cancelled = false;
@@ -51,7 +60,7 @@ function GuardianAuth() {
         const session = await completeGoogleSignIn();
         if (!cancelled && session) {
           toast.success("Signed in with Google");
-          navigate({ to: "/parent" });
+          goToDashboard(session.role);
         }
       } catch (err) {
         if (!cancelled) toast.error(err instanceof Error ? err.message : "Google sign-in failed");
@@ -60,6 +69,7 @@ function GuardianAuth() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -67,24 +77,34 @@ function GuardianAuth() {
     setLoading(true);
     try {
       if (mode === "signin") {
-        await signIn(email, password);
+        const s = await signIn(email, password);
         toast.success("Welcome back");
+        goToDashboard(s.role);
       } else {
-        if (!fullName || !phone) throw new Error("Please fill in all fields");
-        const cleaned = students
-          .map((s) => ({ studentId: s.studentId.trim(), school: s.school.trim() }))
-          .filter((s) => s.studentId.length > 0);
-        if (cleaned.length === 0) throw new Error("Add at least one student ID");
-        await signUp({ fullName, email, phone, students: cleaned, password });
+        if (!fullName) throw new Error("Please enter your full name");
+        if (role !== "admin" && !phone) throw new Error("Please enter your phone");
+        let cleaned: StudentLink[] = [];
+        if (role === "parent" || role === "student") {
+          cleaned = students
+            .map((s) => ({ studentId: s.studentId.trim(), school: s.school.trim() }))
+            .filter((s) => s.studentId.length > 0);
+          if (cleaned.length === 0) throw new Error(role === "parent" ? "Add at least one child" : "Enter your Student ID");
+        }
+        if (role === "admin") throw new Error("Admin accounts cannot be self-registered");
+        const s = await signUp({
+          fullName, email, phone, students: cleaned, password,
+          role, businessName: role === "vendor" ? businessName : undefined,
+        });
         toast.success("Account created");
+        goToDashboard(s.role);
       }
-      navigate({ to: "/parent" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <div className="min-h-screen">
