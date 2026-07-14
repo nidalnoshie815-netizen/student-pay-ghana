@@ -222,28 +222,17 @@ function GuardianAuth() {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground">
-                      Children ({students.length})
-                    </span>
-                    <button
-                      type="button"
-                      onClick={addStudent}
-                      className="inline-flex items-center gap-1 rounded-full border border-border bg-background/40 px-3 py-1 text-xs font-medium text-primary hover:bg-background"
-                    >
-                      <Plus className="h-3 w-3" /> Add child
-                    </button>
-                  </div>
-                  {students.length > 3 && (
+                  {role === "parent" && students.length > 3 && (
                     <p className="text-[11px] text-muted-foreground">
                       Managing more than 3 students? Add each child's ID and school below — there's no limit.
                     </p>
                   )}
-                  {students.map((s, i) => (
+                  {(role === "parent" ? students : students.slice(0, 1)).map((s, i) => (
                     <div
                       key={i}
                       className="rounded-xl border border-border bg-background/40 p-3 space-y-2"
                     >
+                      {role === "parent" && (
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                           Child {i + 1}
@@ -259,6 +248,7 @@ function GuardianAuth() {
                           </button>
                         )}
                       </div>
+                      )}
                       <input
                         value={s.studentId}
                         onChange={(e) => updateStudent(i, { studentId: e.target.value.toUpperCase() })}
@@ -269,16 +259,18 @@ function GuardianAuth() {
                       <input
                         value={s.school}
                         onChange={(e) => updateStudent(i, { school: e.target.value })}
-                        placeholder="School name"
+                        placeholder={role === "parent" ? "School name" : "Your school"}
                         className="input-field"
                         required
                       />
                     </div>
                   ))}
                 </div>
-
+                )}
               </>
             )}
+
+
 
             <Field label="Email">
               <input
