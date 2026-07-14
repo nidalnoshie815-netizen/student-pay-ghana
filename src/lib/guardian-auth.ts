@@ -61,6 +61,8 @@ export interface StudentLink {
   grade?: string;
 }
 
+export type Role = "parent" | "student" | "vendor" | "admin";
+
 export interface Guardian {
   id: string;
   fullName: string;
@@ -69,6 +71,9 @@ export interface Guardian {
   studentId: string; // primary (first) student — kept for back-compat
   students: StudentLink[];
   createdAt: number;
+  role?: Role; // defaults to "parent" for legacy accounts
+  businessName?: string; // vendor
+  suspended?: boolean;
   avatarDataUrl?: string;
   address?: string;
   occupation?: string;
@@ -77,6 +82,7 @@ export interface Guardian {
   preferredLanguage?: string;
   dateOfBirth?: string;
 }
+
 
 interface StoredGuardian extends Guardian {
   passwordHash: string;
