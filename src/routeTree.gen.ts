@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VendorRouteImport } from './routes/vendor'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as StudentRouteImport } from './routes/student'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -33,6 +34,11 @@ import { Route as AddMoneyTelecelRouteImport } from './routes/add-money.telecel'
 import { Route as AddMoneyMtnRouteImport } from './routes/add-money.mtn'
 import { Route as AddMoneyAirteltigoRouteImport } from './routes/add-money.airteltigo'
 
+const VendorRoute = VendorRouteImport.update({
+  id: '/vendor',
+  path: '/vendor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TransactionsRoute = TransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRouteWithChildren
   '/student': typeof StudentRoute
   '/transactions': typeof TransactionsRoute
+  '/vendor': typeof VendorRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
   '/add-money/telecel': typeof AddMoneyTelecelRoute
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/parent': typeof ParentRoute
   '/student': typeof StudentRoute
   '/transactions': typeof TransactionsRoute
+  '/vendor': typeof VendorRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
   '/add-money/telecel': typeof AddMoneyTelecelRoute
@@ -207,6 +215,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRouteWithChildren
   '/student': typeof StudentRoute
   '/transactions': typeof TransactionsRoute
+  '/vendor': typeof VendorRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
   '/add-money/telecel': typeof AddMoneyTelecelRoute
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/student'
     | '/transactions'
+    | '/vendor'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
     | '/add-money/telecel'
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/parent'
     | '/student'
     | '/transactions'
+    | '/vendor'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
     | '/add-money/telecel'
@@ -283,6 +294,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/student'
     | '/transactions'
+    | '/vendor'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
     | '/add-money/telecel'
@@ -309,6 +321,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRouteWithChildren
   StudentRoute: typeof StudentRoute
   TransactionsRoute: typeof TransactionsRoute
+  VendorRoute: typeof VendorRoute
   GuardianAuthRoute: typeof GuardianAuthRoute
   GuardianForgotPasswordRoute: typeof GuardianForgotPasswordRoute
   GuardianProfileRoute: typeof GuardianProfileRoute
@@ -316,6 +329,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vendor': {
+      id: '/vendor'
+      path: '/vendor'
+      fullPath: '/vendor'
+      preLoaderRoute: typeof VendorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/transactions': {
       id: '/transactions'
       path: '/transactions'
@@ -534,6 +554,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRouteWithChildren,
   StudentRoute: StudentRoute,
   TransactionsRoute: TransactionsRoute,
+  VendorRoute: VendorRoute,
   GuardianAuthRoute: GuardianAuthRoute,
   GuardianForgotPasswordRoute: GuardianForgotPasswordRoute,
   GuardianProfileRoute: GuardianProfileRoute,
