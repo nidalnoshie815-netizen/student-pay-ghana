@@ -15,6 +15,7 @@ import { Route as StudentRouteImport } from './routes/student'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AddMoneyRouteImport } from './routes/add-money'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings.index'
@@ -62,6 +63,11 @@ const ParentRoute = ParentRouteImport.update({
 const InsightsRoute = InsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AddMoneyRoute = AddMoneyRouteImport.update({
@@ -158,6 +164,7 @@ const AddMoneyAirteltigoRoute = AddMoneyAirteltigoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/add-money': typeof AddMoneyRouteWithChildren
+  '/admin': typeof AdminRoute
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
   '/settings': typeof SettingsRouteWithChildren
@@ -184,6 +191,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/add-money': typeof AddMoneyRouteWithChildren
+  '/admin': typeof AdminRoute
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
   '/student': typeof StudentRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/add-money': typeof AddMoneyRouteWithChildren
+  '/admin': typeof AdminRoute
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
   '/settings': typeof SettingsRouteWithChildren
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/add-money'
+    | '/admin'
     | '/insights'
     | '/parent'
     | '/settings'
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/add-money'
+    | '/admin'
     | '/insights'
     | '/parent'
     | '/student'
@@ -289,6 +300,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/add-money'
+    | '/admin'
     | '/insights'
     | '/parent'
     | '/settings'
@@ -316,6 +328,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AddMoneyRoute: typeof AddMoneyRouteWithChildren
+  AdminRoute: typeof AdminRoute
   InsightsRoute: typeof InsightsRoute
   ParentRoute: typeof ParentRoute
   SettingsRoute: typeof SettingsRouteWithChildren
@@ -369,6 +382,13 @@ declare module '@tanstack/react-router' {
       path: '/insights'
       fullPath: '/insights'
       preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/add-money': {
@@ -549,6 +569,7 @@ const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AddMoneyRoute: AddMoneyRouteWithChildren,
+  AdminRoute: AdminRoute,
   InsightsRoute: InsightsRoute,
   ParentRoute: ParentRoute,
   SettingsRoute: SettingsRouteWithChildren,
