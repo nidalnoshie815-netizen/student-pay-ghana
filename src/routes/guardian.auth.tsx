@@ -157,6 +157,25 @@ function GuardianAuth() {
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             {mode === "signup" && (
               <>
+                <div>
+                  <span className="text-xs font-medium text-muted-foreground">I am a…</span>
+                  <div className="mt-1 grid grid-cols-3 gap-2">
+                    {(["parent", "student", "vendor"] as const).map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRole(r)}
+                        className={`rounded-lg border px-2 py-2 text-xs font-medium transition ${
+                          role === r
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-background/40 text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {ROLE_LABEL[r]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <Field label="Full name">
                   <input
                     value={fullName}
@@ -175,7 +194,34 @@ function GuardianAuth() {
                     required
                   />
                 </Field>
+                {role === "vendor" && (
+                  <Field label="Business name">
+                    <input
+                      value={businessName}
+                      onChange={(e) => setBusinessName(e.target.value)}
+                      placeholder="MaxMart Store"
+                      className="input-field"
+                      required
+                    />
+                  </Field>
+                )}
+                {(role === "parent" || role === "student") && (
                 <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {role === "parent" ? `Children (${students.length})` : "Your Student ID"}
+                    </span>
+                    {role === "parent" && (
+                    <button
+                      type="button"
+                      onClick={addStudent}
+                      className="inline-flex items-center gap-1 rounded-full border border-border bg-background/40 px-3 py-1 text-xs font-medium text-primary hover:bg-background"
+                    >
+                      <Plus className="h-3 w-3" /> Add child
+                    </button>
+                    )}
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-muted-foreground">
                       Children ({students.length})
