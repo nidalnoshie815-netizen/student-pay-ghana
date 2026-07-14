@@ -134,6 +134,8 @@ export async function signUp(input: {
   studentId?: string;
   students?: StudentLink[];
   password: string;
+  role?: Role;
+  businessName?: string;
 }): Promise<Guardian> {
   const users = loadUsers();
   const email = input.email.trim().toLowerCase();
@@ -141,6 +143,7 @@ export async function signUp(input: {
     throw new Error("An account with this email already exists");
   }
   if (input.password.length < 6) throw new Error("Password must be at least 6 characters");
+  const role: Role = input.role || "parent";
 
   const normalized: StudentLink[] = (input.students && input.students.length
     ? input.students
@@ -151,16 +154,24 @@ export async function signUp(input: {
     .map((s) => ({ studentId: s.studentId.trim().toUpperCase(), school: s.school.trim() }))
     .filter((s) => s.studentId.length > 0);
 
-  if (normalized.length === 0) throw new Error("Please add at least one student");
+  // Parents and students require a student ID; vendors do not.
+  if ((role === "parent" || role === "student") && normalized.length === 0) {
+    throw new Error(role === "parent" ? "Please add at least one student" : "Please enter your Student ID");
+  }
+  if (role === "vendor" && !input.businessName?.trim()) {
+    throw new Error("Business name is required");
+  }
 
   const guardian: StoredGuardian = {
     id: crypto.randomUUID(),
     fullName: input.fullName.trim(),
     email,
     phone: input.phone.trim(),
-    studentId: normalized[0].studentId,
+    studentId: normalized[0]?.studentId || "",
     students: normalized,
     createdAt: Date.now(),
+    role,
+    businessName: input.businessName?.trim(),
     passwordHash: await hash(input.password),
   };
   users.push(guardian);
@@ -169,6 +180,39 @@ export async function signUp(input: {
   setSession(session);
   return session;
 }
+
+// Seed a default admin account if none exists yet.
+export async function ensureAdminSeed() {
+  if (typeof window === "undefined") return;
+  const users = loadUsers();
+  if (users.some((u) => u.role === "admin")) return;
+  const admin: StoredGuardian = {
+    id: crypto.randomUUID(),
+    fullName: "StudentPay Admin",
+    email: "admin@studentpay.gh",
+    phone: "",
+    studentId: "",
+    students: [],
+    createdAt: Date.now(),
+    role: "admin",
+    passwordHash: await hash("admin123"),
+  };
+  users.push(admin);
+  saveUsers(users);
+}
+
+export function listAllUsers(): Guardian[] {
+  return loadUsers().map(({ passwordHash: _p, ...rest }) => rest);
+}
+
+export function setUserSuspended(id: string, suspended: boolean) {
+  const users = loadUsers();
+  const idx = users.findIndex((u) => u.id === id);
+  if (idx === -1) return;
+  users[idx].suspended = suspended;
+  saveUsers(users);
+}
+
 
 const PENDING_STUDENTS_KEY = "studentpay_pending_students_v1";
 
