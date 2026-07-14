@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TransactionsRouteImport } from './routes/transactions'
+import { Route as StudentRouteImport } from './routes/student'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as InsightsRouteImport } from './routes/insights'
@@ -35,6 +36,11 @@ import { Route as AddMoneyAirteltigoRouteImport } from './routes/add-money.airte
 const TransactionsRoute = TransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentRoute = StudentRouteImport.update({
+  id: '/student',
+  path: '/student',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
   '/settings': typeof SettingsRouteWithChildren
+  '/student': typeof StudentRoute
   '/transactions': typeof TransactionsRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/add-money': typeof AddMoneyRouteWithChildren
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
+  '/student': typeof StudentRoute
   '/transactions': typeof TransactionsRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
   '/settings': typeof SettingsRouteWithChildren
+  '/student': typeof StudentRoute
   '/transactions': typeof TransactionsRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
@@ -223,6 +232,7 @@ export interface FileRouteTypes {
     | '/insights'
     | '/parent'
     | '/settings'
+    | '/student'
     | '/transactions'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/add-money'
     | '/insights'
     | '/parent'
+    | '/student'
     | '/transactions'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | '/insights'
     | '/parent'
     | '/settings'
+    | '/student'
     | '/transactions'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
@@ -295,6 +307,7 @@ export interface RootRouteChildren {
   InsightsRoute: typeof InsightsRoute
   ParentRoute: typeof ParentRoute
   SettingsRoute: typeof SettingsRouteWithChildren
+  StudentRoute: typeof StudentRoute
   TransactionsRoute: typeof TransactionsRoute
   GuardianAuthRoute: typeof GuardianAuthRoute
   GuardianForgotPasswordRoute: typeof GuardianForgotPasswordRoute
@@ -308,6 +321,13 @@ declare module '@tanstack/react-router' {
       path: '/transactions'
       fullPath: '/transactions'
       preLoaderRoute: typeof TransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student': {
+      id: '/student'
+      path: '/student'
+      fullPath: '/student'
+      preLoaderRoute: typeof StudentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -512,6 +532,7 @@ const rootRouteChildren: RootRouteChildren = {
   InsightsRoute: InsightsRoute,
   ParentRoute: ParentRoute,
   SettingsRoute: SettingsRouteWithChildren,
+  StudentRoute: StudentRoute,
   TransactionsRoute: TransactionsRoute,
   GuardianAuthRoute: GuardianAuthRoute,
   GuardianForgotPasswordRoute: GuardianForgotPasswordRoute,
