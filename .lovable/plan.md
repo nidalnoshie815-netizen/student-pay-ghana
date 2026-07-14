@@ -1,92 +1,64 @@
-# Plan: Quick Actions, Bottom Nav & Add Money Flow
 
-Build a richer parent dashboard with quick actions and a categorized recent-transactions list, add a persistent mobile bottom navigation, and create a dedicated multi-step "Add Money" flow with provider-branded payment screens.
+## Goal
+Turn Student Pay into a multi-role platform. Keep all existing UI, colors, logo, nav, and the current Parent dashboard exactly as they are. Add three new roles (Student, Vendor, Admin) that share the same design language.
 
-## 1. Parent dashboard updates (`src/routes/parent.tsx`)
+## Roles & what each dashboard does
 
-**Quick Action Buttons** (4-up grid under the AI Alerts banner):
-- Fund Wallet → navigates to `/add-money`
-- Withdraw → opens withdraw dialog (reuses existing withdrawal logic)
-- Transactions → `/transactions`
-- AI Insights → `/insights`
+- **Parent** — unchanged. Existing `/parent` dashboard, QR wallet, add-money, transactions, insights, settings.
+- **Student** — view own balance (funded by parent), show withdrawal QR (student ID), see recent transactions, pay a vendor.
+- **Vendor** — scan/enter a student QR/ID + amount, request payment, see received-payments history.
+- **Admin** — overview stats (users per role, total volume), user list with role filter, ability to suspend a user.
 
-Each rendered as a rounded card with icon + label, using semantic tokens (`bg-card`, `border-border`, `text-primary`).
+## Auth model
 
-**Recent Transactions Section** — replace the current flat list with categorized rows. Each transaction gets a `category` derived from existing fields:
-- `POS Withdrawal` (withdrawal w/ note containing "POS")
-- `Wallet Funding` (deposit)
-- `Transfer` (withdrawal w/ note containing "transfer")
-- `Vendor Payment` (withdrawal, default)
+Extend the existing mock `guardian-auth` into a generic `auth` layer with a `role` field on every account: `"parent" | "student" | "vendor" | "admin"`.
 
-Show category label + icon, amount, time. "See all" link → `/transactions`.
+- Sign-up page adds a role selector (Parent stays the default; Parent-specific "children" section only shows when role = parent; Vendor gets a "Business name" field; Student gets a "Student ID + School" field; Admin is not self-serve — seeded).
+- Sign-in is single form; after login we read the role and redirect:
+  - parent → `/parent`
+  - student → `/student`
+  - vendor → `/vendor`
+  - admin → `/admin`
+- Google sign-in preserved; new Google accounts default to `parent` unless a pending role was set on the auth page.
+- One seeded admin account (email `admin@studentpay.gh`, password `admin123`) created on first load if none exists.
 
-Remove the inline top-up form from this page (moves to `/add-money`).
+## Routing
 
-## 2. Bottom Navigation Bar (new component)
+Add a small `RoleGate` helper (client-side, mirrors existing guardian redirect) used by each new dashboard route. It reads the session and, if the role doesn't match, redirects to that user's correct dashboard (or `/guardian/auth` if signed out).
 
-`src/components/BottomNav.tsx` — fixed bottom bar, 5 items:
-- Home (`/parent`)
-- Transactions (`/transactions`)
-- Scan (center, elevated button — placeholder action, toast "Coming soon")
-- Insights (`/insights`)
-- Profile (`/guardian/profile`)
+New route files:
+- `src/routes/student.tsx`
+- `src/routes/vendor.tsx`
+- `src/routes/admin.tsx`
 
-Mounted inside authenticated pages (parent, transactions, insights, add-money). Hidden on `md+` if desired, or shown always. Active route highlighted via `useRouterState`.
+Landing page (`/`) gets a subtle "I'm a …" role tab on the CTA so new users land on the right sign-up flow; visuals unchanged.
 
-## 3. Add Money flow (new routes)
+## Data (mock localStorage, same pattern as today)
 
-### `src/routes/add-money.tsx` — "Add Money" picker
-- Title: **Add Money**
-- Payment method cards: MTN Mobile Money, Telecel Cash, AirtelTigo Money (reuse `PaymentMethodPicker` styling, excluding Vodafone)
-- Amount input (GH₵) with quick-amount chips
-- **Continue** button → navigates to `/add-money/{provider}` with amount in search params
-- Footer caption: *"Secure payments powered by Student Pay"*
+Extend `mock-store` with:
+- `users` (already there via guardian) — add `role`, `businessName?`, `suspended?`.
+- `studentWallets` — balance per studentId, funded when a parent tops up.
+- `vendorPayments` — vendor-initiated charges linked to a studentId.
 
-### `src/routes/add-money.mtn.tsx` — MTN Mobile Money
-- Header: **MTN Mobile Money** (yellow brand accent)
-- Fields: MTN Number, Amount (prefilled from search param)
-- Info text: *"You will receive a prompt on your phone. Please enter your MoMo PIN to authorize."*
-- **Pay Now** button → simulates payment, calls `addDeposit`, shows success, returns to `/parent`
+Parent "Add money" already writes transactions; we'll also credit the linked student's wallet so the Student dashboard shows a real balance. No schema/DB changes — still front-end mock (matches the rest of the app).
 
-### `src/routes/add-money.telecel.tsx` — Telecel Cash
-Same layout, red brand accent, header **Telecel Cash**.
+## Files to add / edit
 
-### `src/routes/add-money.airteltigo.tsx` — AirtelTigo Money
-Same layout, blue brand accent, header **AirtelTigo Money**.
+Add:
+- `src/lib/roles.ts` — role type + `useRequireRole(role)` hook + redirect map.
+- `src/routes/student.tsx`, `src/routes/vendor.tsx`, `src/routes/admin.tsx`.
+- `src/components/RoleSwitcher.tsx` — role picker used in sign-up.
 
-Shared logic extracted to `src/components/ProviderPayForm.tsx` to avoid duplication.
+Edit (minimal, additive):
+- `src/lib/guardian-auth.ts` — add `role`, `businessName` fields; seed admin; role-aware redirects; keep function names.
+- `src/routes/guardian.auth.tsx` — add role selector; conditional fields; redirect by role after login.
+- `src/routes/index.tsx` — role tabs on the hero CTA (design preserved).
+- `src/components/BottomNav.tsx` — show only for parent (existing behavior); student/vendor/admin get their own lightweight top nav to stay consistent with the current look.
 
-## 4. Supporting routes (lightweight placeholders, can grow later)
+Nothing in the existing Parent flow, colors, or components changes visually.
 
-- `src/routes/transactions.tsx` — full list of all transactions, filterable by type
-- `src/routes/insights.tsx` — AI alerts (reuses `generateAIAlerts`) in a dedicated view
+## Out of scope for this pass
+- Real backend / Lovable Cloud tables (still local mock, matching current app).
+- Vendor payouts, admin audit logs, KYC.
 
-Both are auth-gated (redirect to `/guardian/auth` if no guardian) and include the bottom nav.
-
-## 5. Mock store tweak (`src/lib/mock-store.ts`)
-
-Add an optional `category` field to `Transaction` ("POS Withdrawal" | "Wallet Funding" | "Transfer" | "Vendor Payment"). Update `addDeposit` to set `"Wallet Funding"` and `addWithdrawal` to accept a category arg (default `"Vendor Payment"`). Update seed transactions with categories.
-
-## Technical notes
-
-- All new routes use `createFileRoute` with proper `head()` metadata.
-- All colors via semantic tokens in `src/styles.css` — provider brand accents added as `--brand-mtn`, `--brand-telecel`, `--brand-airteltigo` for reuse.
-- Bottom nav uses `fixed bottom-0` with safe-area padding; main content gets `pb-24` on those pages.
-- Each payment-provider page simulates the prompt with a 1.2s loader before completing the deposit via `addDeposit`.
-- No backend changes — all flows continue to use the existing mock store.
-
-## Files to create
-- `src/routes/add-money.tsx`
-- `src/routes/add-money.mtn.tsx`
-- `src/routes/add-money.telecel.tsx`
-- `src/routes/add-money.airteltigo.tsx`
-- `src/routes/transactions.tsx`
-- `src/routes/insights.tsx`
-- `src/components/BottomNav.tsx`
-- `src/components/ProviderPayForm.tsx`
-- `src/components/QuickActions.tsx`
-
-## Files to edit
-- `src/routes/parent.tsx` (quick actions, categorized recent tx, remove inline top-up, add bottom nav)
-- `src/lib/mock-store.ts` (category field)
-- `src/styles.css` (provider brand tokens)
+Ship this, then we can wire it to Cloud in a follow-up if you want persistence across devices.

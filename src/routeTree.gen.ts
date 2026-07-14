@@ -9,10 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VendorRouteImport } from './routes/vendor'
 import { Route as TransactionsRouteImport } from './routes/transactions'
+import { Route as StudentRouteImport } from './routes/student'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AddMoneyRouteImport } from './routes/add-money'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings.index'
@@ -32,9 +35,19 @@ import { Route as AddMoneyTelecelRouteImport } from './routes/add-money.telecel'
 import { Route as AddMoneyMtnRouteImport } from './routes/add-money.mtn'
 import { Route as AddMoneyAirteltigoRouteImport } from './routes/add-money.airteltigo'
 
+const VendorRoute = VendorRouteImport.update({
+  id: '/vendor',
+  path: '/vendor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TransactionsRoute = TransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentRoute = StudentRouteImport.update({
+  id: '/student',
+  path: '/student',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -50,6 +63,11 @@ const ParentRoute = ParentRouteImport.update({
 const InsightsRoute = InsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AddMoneyRoute = AddMoneyRouteImport.update({
@@ -146,10 +164,13 @@ const AddMoneyAirteltigoRoute = AddMoneyAirteltigoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/add-money': typeof AddMoneyRouteWithChildren
+  '/admin': typeof AdminRoute
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
   '/settings': typeof SettingsRouteWithChildren
+  '/student': typeof StudentRoute
   '/transactions': typeof TransactionsRoute
+  '/vendor': typeof VendorRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
   '/add-money/telecel': typeof AddMoneyTelecelRoute
@@ -170,9 +191,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/add-money': typeof AddMoneyRouteWithChildren
+  '/admin': typeof AdminRoute
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
+  '/student': typeof StudentRoute
   '/transactions': typeof TransactionsRoute
+  '/vendor': typeof VendorRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
   '/add-money/telecel': typeof AddMoneyTelecelRoute
@@ -194,10 +218,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/add-money': typeof AddMoneyRouteWithChildren
+  '/admin': typeof AdminRoute
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
   '/settings': typeof SettingsRouteWithChildren
+  '/student': typeof StudentRoute
   '/transactions': typeof TransactionsRoute
+  '/vendor': typeof VendorRoute
   '/add-money/airteltigo': typeof AddMoneyAirteltigoRoute
   '/add-money/mtn': typeof AddMoneyMtnRoute
   '/add-money/telecel': typeof AddMoneyTelecelRoute
@@ -220,10 +247,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/add-money'
+    | '/admin'
     | '/insights'
     | '/parent'
     | '/settings'
+    | '/student'
     | '/transactions'
+    | '/vendor'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
     | '/add-money/telecel'
@@ -244,9 +274,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/add-money'
+    | '/admin'
     | '/insights'
     | '/parent'
+    | '/student'
     | '/transactions'
+    | '/vendor'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
     | '/add-money/telecel'
@@ -267,10 +300,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/add-money'
+    | '/admin'
     | '/insights'
     | '/parent'
     | '/settings'
+    | '/student'
     | '/transactions'
+    | '/vendor'
     | '/add-money/airteltigo'
     | '/add-money/mtn'
     | '/add-money/telecel'
@@ -292,10 +328,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AddMoneyRoute: typeof AddMoneyRouteWithChildren
+  AdminRoute: typeof AdminRoute
   InsightsRoute: typeof InsightsRoute
   ParentRoute: typeof ParentRoute
   SettingsRoute: typeof SettingsRouteWithChildren
+  StudentRoute: typeof StudentRoute
   TransactionsRoute: typeof TransactionsRoute
+  VendorRoute: typeof VendorRoute
   GuardianAuthRoute: typeof GuardianAuthRoute
   GuardianForgotPasswordRoute: typeof GuardianForgotPasswordRoute
   GuardianProfileRoute: typeof GuardianProfileRoute
@@ -303,11 +342,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vendor': {
+      id: '/vendor'
+      path: '/vendor'
+      fullPath: '/vendor'
+      preLoaderRoute: typeof VendorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/transactions': {
       id: '/transactions'
       path: '/transactions'
       fullPath: '/transactions'
       preLoaderRoute: typeof TransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student': {
+      id: '/student'
+      path: '/student'
+      fullPath: '/student'
+      preLoaderRoute: typeof StudentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -329,6 +382,13 @@ declare module '@tanstack/react-router' {
       path: '/insights'
       fullPath: '/insights'
       preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/add-money': {
@@ -509,10 +569,13 @@ const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AddMoneyRoute: AddMoneyRouteWithChildren,
+  AdminRoute: AdminRoute,
   InsightsRoute: InsightsRoute,
   ParentRoute: ParentRoute,
   SettingsRoute: SettingsRouteWithChildren,
+  StudentRoute: StudentRoute,
   TransactionsRoute: TransactionsRoute,
+  VendorRoute: VendorRoute,
   GuardianAuthRoute: GuardianAuthRoute,
   GuardianForgotPasswordRoute: GuardianForgotPasswordRoute,
   GuardianProfileRoute: GuardianProfileRoute,
@@ -520,13 +583,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

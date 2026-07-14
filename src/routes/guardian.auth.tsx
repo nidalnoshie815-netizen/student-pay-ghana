@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
-import { completeGoogleSignIn, signIn, signInWithGoogle, signUp, type StudentLink } from "@/lib/guardian-auth";
+import { completeGoogleSignIn, ensureAdminSeed, signIn, signInWithGoogle, signUp, type StudentLink } from "@/lib/guardian-auth";
+import { DASHBOARD_BY_ROLE, ROLE_LABEL, type Role } from "@/lib/roles";
 import { Eye, EyeOff, Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/guardian/auth")({
   head: () => ({
@@ -18,6 +20,7 @@ export const Route = createFileRoute("/guardian/auth")({
 function GuardianAuth() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [role, setRole] = useState<Role>("parent");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -27,9 +30,13 @@ function GuardianAuth() {
   // signup
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [businessName, setBusinessName] = useState("");
   const [students, setStudents] = useState<StudentLink[]>([
     { studentId: "", school: "" },
   ]);
+
+  // Seed default admin once so the platform always has one.
+  useEffect(() => { void ensureAdminSeed(); }, []);
 
   function updateStudent(index: number, patch: Partial<StudentLink>) {
     setStudents((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
@@ -41,6 +48,10 @@ function GuardianAuth() {
     setStudents((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== index)));
   }
 
+  function goToDashboard(r: Role | undefined) {
+    navigate({ to: DASHBOARD_BY_ROLE[(r as Role) || "parent"] });
+  }
+
   // Complete Google sign-in when we land back here from the OAuth redirect.
   useEffect(() => {
     let cancelled = false;
@@ -49,7 +60,7 @@ function GuardianAuth() {
         const session = await completeGoogleSignIn();
         if (!cancelled && session) {
           toast.success("Signed in with Google");
-          navigate({ to: "/parent" });
+          goToDashboard(session.role);
         }
       } catch (err) {
         if (!cancelled) toast.error(err instanceof Error ? err.message : "Google sign-in failed");
@@ -58,6 +69,7 @@ function GuardianAuth() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -65,24 +77,34 @@ function GuardianAuth() {
     setLoading(true);
     try {
       if (mode === "signin") {
-        await signIn(email, password);
+        const s = await signIn(email, password);
         toast.success("Welcome back");
+        goToDashboard(s.role);
       } else {
-        if (!fullName || !phone) throw new Error("Please fill in all fields");
-        const cleaned = students
-          .map((s) => ({ studentId: s.studentId.trim(), school: s.school.trim() }))
-          .filter((s) => s.studentId.length > 0);
-        if (cleaned.length === 0) throw new Error("Add at least one student ID");
-        await signUp({ fullName, email, phone, students: cleaned, password });
+        if (!fullName) throw new Error("Please enter your full name");
+        if (role !== "admin" && !phone) throw new Error("Please enter your phone");
+        let cleaned: StudentLink[] = [];
+        if (role === "parent" || role === "student") {
+          cleaned = students
+            .map((s) => ({ studentId: s.studentId.trim(), school: s.school.trim() }))
+            .filter((s) => s.studentId.length > 0);
+          if (cleaned.length === 0) throw new Error(role === "parent" ? "Add at least one child" : "Enter your Student ID");
+        }
+        if (role === "admin") throw new Error("Admin accounts cannot be self-registered");
+        const s = await signUp({
+          fullName, email, phone, students: cleaned, password,
+          role, businessName: role === "vendor" ? businessName : undefined,
+        });
         toast.success("Account created");
+        goToDashboard(s.role);
       }
-      navigate({ to: "/parent" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <div className="min-h-screen">
@@ -135,6 +157,25 @@ function GuardianAuth() {
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             {mode === "signup" && (
               <>
+                <div>
+                  <span className="text-xs font-medium text-muted-foreground">I am a…</span>
+                  <div className="mt-1 grid grid-cols-3 gap-2">
+                    {(["parent", "student", "vendor"] as const).map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRole(r)}
+                        className={`rounded-lg border px-2 py-2 text-xs font-medium transition ${
+                          role === r
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-background/40 text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {ROLE_LABEL[r]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <Field label="Full name">
                   <input
                     value={fullName}
@@ -153,11 +194,24 @@ function GuardianAuth() {
                     required
                   />
                 </Field>
+                {role === "vendor" && (
+                  <Field label="Business name">
+                    <input
+                      value={businessName}
+                      onChange={(e) => setBusinessName(e.target.value)}
+                      placeholder="MaxMart Store"
+                      className="input-field"
+                      required
+                    />
+                  </Field>
+                )}
+                {(role === "parent" || role === "student") && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-muted-foreground">
-                      Children ({students.length})
+                      {role === "parent" ? `Children (${students.length})` : "Your Student ID"}
                     </span>
+                    {role === "parent" && (
                     <button
                       type="button"
                       onClick={addStudent}
@@ -165,17 +219,20 @@ function GuardianAuth() {
                     >
                       <Plus className="h-3 w-3" /> Add child
                     </button>
+                    )}
                   </div>
-                  {students.length > 3 && (
+
+                  {role === "parent" && students.length > 3 && (
                     <p className="text-[11px] text-muted-foreground">
                       Managing more than 3 students? Add each child's ID and school below — there's no limit.
                     </p>
                   )}
-                  {students.map((s, i) => (
+                  {(role === "parent" ? students : students.slice(0, 1)).map((s, i) => (
                     <div
                       key={i}
                       className="rounded-xl border border-border bg-background/40 p-3 space-y-2"
                     >
+                      {role === "parent" && (
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                           Child {i + 1}
@@ -191,6 +248,7 @@ function GuardianAuth() {
                           </button>
                         )}
                       </div>
+                      )}
                       <input
                         value={s.studentId}
                         onChange={(e) => updateStudent(i, { studentId: e.target.value.toUpperCase() })}
@@ -201,16 +259,18 @@ function GuardianAuth() {
                       <input
                         value={s.school}
                         onChange={(e) => updateStudent(i, { school: e.target.value })}
-                        placeholder="School name"
+                        placeholder={role === "parent" ? "School name" : "Your school"}
                         className="input-field"
                         required
                       />
                     </div>
                   ))}
                 </div>
-
+                )}
               </>
             )}
+
+
 
             <Field label="Email">
               <input

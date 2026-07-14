@@ -47,7 +47,12 @@ function ParentDashboard() {
   const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   useEffect(() => {
-    if (!guardian) navigate({ to: "/guardian/auth" });
+    if (!guardian) { navigate({ to: "/guardian/auth" }); return; }
+    const role = (guardian.role as "parent" | "student" | "vendor" | "admin") || "parent";
+    if (role !== "parent") {
+      const map = { student: "/student", vendor: "/vendor", admin: "/admin" } as const;
+      navigate({ to: map[role as "student" | "vendor" | "admin"] });
+    }
   }, [guardian, navigate]);
 
   const aiAlerts = useMemo(
