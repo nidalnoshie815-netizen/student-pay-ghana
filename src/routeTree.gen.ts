@@ -13,6 +13,7 @@ import { Route as VendorRouteImport } from './routes/vendor'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as StudentRouteImport } from './routes/student'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -53,6 +54,11 @@ const StudentRoute = StudentRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParentRoute = ParentRouteImport.update({
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRouteWithChildren
   '/student': typeof StudentRoute
   '/transactions': typeof TransactionsRoute
@@ -194,6 +201,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/student': typeof StudentRoute
   '/transactions': typeof TransactionsRoute
   '/vendor': typeof VendorRoute
@@ -221,6 +229,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/insights': typeof InsightsRoute
   '/parent': typeof ParentRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRouteWithChildren
   '/student': typeof StudentRoute
   '/transactions': typeof TransactionsRoute
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/insights'
     | '/parent'
+    | '/reset-password'
     | '/settings'
     | '/student'
     | '/transactions'
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/insights'
     | '/parent'
+    | '/reset-password'
     | '/student'
     | '/transactions'
     | '/vendor'
@@ -303,6 +314,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/insights'
     | '/parent'
+    | '/reset-password'
     | '/settings'
     | '/student'
     | '/transactions'
@@ -331,6 +343,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   InsightsRoute: typeof InsightsRoute
   ParentRoute: typeof ParentRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRouteWithChildren
   StudentRoute: typeof StudentRoute
   TransactionsRoute: typeof TransactionsRoute
@@ -368,6 +381,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parent': {
@@ -572,6 +592,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   InsightsRoute: InsightsRoute,
   ParentRoute: ParentRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRouteWithChildren,
   StudentRoute: StudentRoute,
   TransactionsRoute: TransactionsRoute,
