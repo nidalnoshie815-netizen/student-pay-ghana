@@ -206,7 +206,7 @@ export async function signUp(input: {
 
   // Persist the full students list on the profile (trigger only stored the first).
   if (normalized.length) {
-    await supabase.from("profiles").update({ students: normalized }).eq("id", userId);
+    await supabase.from("profiles").update({ students: normalized as unknown as never }).eq("id", userId);
   }
 
   // If email confirmation is required and no session yet, return a stub.
@@ -333,7 +333,7 @@ export async function updateProfile(input: {
 
   const { error } = await supabase
     .from("profiles")
-    .update({ full_name: fullName, phone, student_id: studentId || null, students: nextStudents })
+    .update({ full_name: fullName, phone, student_id: studentId || null, students: nextStudents as unknown as never })
     .eq("id", session.id);
   if (error) throw error;
   const g = await refreshCache();
