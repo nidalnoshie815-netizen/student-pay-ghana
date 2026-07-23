@@ -298,7 +298,7 @@ export async function completeGoogleSignIn(): Promise<Guardian | null> {
     await supabase
       .from("profiles")
       .update({
-        students: pending,
+        students: pending as unknown as never,
         student_id: pending[0].studentId,
         school: pending[0].school,
       })
@@ -380,7 +380,7 @@ export async function updateProfileFull(
     .update({
       full_name: fullName,
       phone,
-      students: nextStudents,
+      students: nextStudents as unknown as never,
       student_id: nextStudents[0]?.studentId || session.studentId || null,
       avatar_url: input.avatarDataUrl ?? session.avatarDataUrl ?? null,
       address: input.address ?? session.address ?? null,
@@ -405,7 +405,7 @@ export async function updateStudents(students: StudentLink[]): Promise<Guardian>
   if (normalized.length === 0) throw new Error("Add at least one student");
   const { error } = await supabase
     .from("profiles")
-    .update({ students: normalized, student_id: normalized[0].studentId, school: normalized[0].school })
+    .update({ students: normalized as unknown as never, student_id: normalized[0].studentId, school: normalized[0].school })
     .eq("id", session.id);
   if (error) throw error;
   const g = await refreshCache();
