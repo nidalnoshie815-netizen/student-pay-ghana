@@ -16,38 +16,59 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
           business_name: string | null
           created_at: string
+          date_of_birth: string | null
+          emergency_name: string | null
+          emergency_phone: string | null
           full_name: string | null
           id: string
+          occupation: string | null
           phone: string | null
+          preferred_language: string | null
           school: string | null
           student_id: string | null
+          students: Json
           suspended: boolean
           updated_at: string
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
           business_name?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          emergency_name?: string | null
+          emergency_phone?: string | null
           full_name?: string | null
           id: string
+          occupation?: string | null
           phone?: string | null
+          preferred_language?: string | null
           school?: string | null
           student_id?: string | null
+          students?: Json
           suspended?: boolean
           updated_at?: string
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
           business_name?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          emergency_name?: string | null
+          emergency_phone?: string | null
           full_name?: string | null
           id?: string
+          occupation?: string | null
           phone?: string | null
+          preferred_language?: string | null
           school?: string | null
           student_id?: string | null
+          students?: Json
           suspended?: boolean
           updated_at?: string
         }
