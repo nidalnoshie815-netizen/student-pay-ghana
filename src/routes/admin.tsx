@@ -29,28 +29,36 @@ function AdminDashboard() {
   const store = useStore();
   const [users, setUsers] = useState<Guardian[]>([]);
 
+  async function refresh() {
+    try {
+      setUsers(await listAllUsers());
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not load users");
+    }
+  }
+
   useEffect(() => {
-    if (user) setUsers(listAllUsers());
+    if (user) void refresh();
   }, [user]);
 
   if (!user) return null;
 
-  function refresh() { setUsers(listAllUsers()); }
-
   const byRole = (r: Role) => users.filter((u) => (u.role || "parent") === r).length;
   const txVolume = store.transactions.reduce((s, t) => s + t.amount, 0);
+
 
   return (
     <div className="min-h-screen pb-16">
       <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
         <Logo />
         <button
-          onClick={() => { signOut(); toast.success("Signed out"); }}
+          onClick={async () => { await signOut(); toast.success("Signed out"); }}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <LogOut className="h-4 w-4" /> Sign out
         </button>
       </header>
+
 
       <main className="mx-auto max-w-5xl px-6 space-y-6">
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
@@ -88,10 +96,14 @@ function AdminDashboard() {
                 </div>
                 {u.role !== "admin" && (
                   <button
-                    onClick={() => {
-                      setUserSuspended(u.id, !u.suspended);
-                      refresh();
-                      toast.success(u.suspended ? "User reactivated" : "User suspended");
+                    onClick={async () => {
+                      try {
+                        await setUserSuspended(u.id, !u.suspended);
+                        await refresh();
+                        toast.success(u.suspended ? "User reactivated" : "User suspended");
+                      } catch (err) {
+                        toast.error(err instanceof Error ? err.message : "Failed");
+                      }
                     }}
                     className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs ${
                       u.suspended
@@ -104,6 +116,7 @@ function AdminDashboard() {
                   </button>
                 )}
               </div>
+
             ))}
             {users.length === 0 && (
               <p className="py-6 text-center text-sm text-muted-foreground">No users yet.</p>
