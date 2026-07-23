@@ -111,6 +111,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // Hydrate the guardian session cache from Supabase on mount and keep it
+  // in sync with sign-in / sign-out events across the app.
+  if (typeof window !== "undefined") {
+    // Lazy import to avoid pulling supabase into SSR-critical path.
+    void import("@/lib/guardian-auth").then((m) => m.initAuth());
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,58 +1,11 @@
-// Lightweight mock auth for guardians (parents). Stored in localStorage.
-// Replace with Lovable Cloud auth when backend is enabled.
+// Real Supabase-backed auth. The Guardian shape and exported function names
+// are preserved so existing routes continue to work unchanged.
+// A Guardian snapshot is cached in localStorage so `getSession()` stays sync
+// for existing callers; the source of truth is Supabase Auth + `profiles` + `user_roles`.
 
-const PIN_KEY = "studentpay_guardian_pin_v1";
+import { supabase } from "@/integrations/supabase/client";
 
-export function getPin(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(PIN_KEY);
-}
-
-export async function changePin(input: { currentPin?: string; newPin: string }): Promise<void> {
-  const existing = getPin();
-  if (existing && input.currentPin !== existing) {
-    throw new Error("Current PIN is incorrect");
-  }
-  if (!/^\d{4}$/.test(input.newPin)) throw new Error("PIN must be 4 digits");
-  localStorage.setItem(PIN_KEY, input.newPin);
-}
-
-export function updateStudents(students: StudentLink[]): Guardian {
-  const session = getSession();
-  if (!session) throw new Error("Not signed in");
-  const normalized: StudentLink[] = students
-    .map((s) => ({ studentId: s.studentId.trim().toUpperCase(), school: s.school.trim() }))
-    .filter((s) => s.studentId.length > 0);
-  if (normalized.length === 0) throw new Error("Add at least one student");
-  const users = loadUsers();
-  const idx = users.findIndex((u) => u.id === session.id);
-  if (idx === -1) throw new Error("Account not found");
-  users[idx] = {
-    ...users[idx],
-    students: normalized,
-    studentId: normalized[0].studentId,
-  };
-  saveUsers(users);
-  const { passwordHash: _ph, ...updated } = users[idx];
-  setSession(updated);
-  return updated;
-}
-
-export async function changePassword(input: {
-  currentPassword: string;
-  newPassword: string;
-}): Promise<void> {
-  const session = getSession();
-  if (!session) throw new Error("Not signed in");
-  if (input.newPassword.length < 6) throw new Error("Password must be at least 6 characters");
-  const users = loadUsers();
-  const idx = users.findIndex((u) => u.id === session.id);
-  if (idx === -1) throw new Error("Account not found");
-  const currentHash = await hash(input.currentPassword);
-  if (currentHash !== users[idx].passwordHash) throw new Error("Current password is incorrect");
-  users[idx].passwordHash = await hash(input.newPassword);
-  saveUsers(users);
-}
+export type Role = "parent" | "student" | "vendor" | "admin";
 
 export interface StudentLink {
   studentId: string;
@@ -61,18 +14,16 @@ export interface StudentLink {
   grade?: string;
 }
 
-export type Role = "parent" | "student" | "vendor" | "admin";
-
 export interface Guardian {
   id: string;
   fullName: string;
   email: string;
   phone: string;
-  studentId: string; // primary (first) student — kept for back-compat
+  studentId: string;
   students: StudentLink[];
   createdAt: number;
-  role?: Role; // defaults to "parent" for legacy accounts
-  businessName?: string; // vendor
+  role?: Role;
+  businessName?: string;
   suspended?: boolean;
   avatarDataUrl?: string;
   address?: string;
@@ -83,32 +34,19 @@ export interface Guardian {
   dateOfBirth?: string;
 }
 
+const SESSION_KEY = "studentpay_guardian_session_v2";
+const PIN_KEY = "studentpay_guardian_pin_v1";
+const PENDING_STUDENTS_KEY = "studentpay_pending_students_v1";
 
-interface StoredGuardian extends Guardian {
-  passwordHash: string;
+function emitAuth() {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("studentpay:auth"));
 }
 
-const USERS_KEY = "studentpay_guardians_v1";
-const SESSION_KEY = "studentpay_guardian_session_v1";
-
-async function hash(pw: string): Promise<string> {
-  const data = new TextEncoder().encode(pw);
-  const buf = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-function loadUsers(): StoredGuardian[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-function saveUsers(u: StoredGuardian[]) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(u));
+function setSessionCache(g: Guardian | null) {
+  if (typeof window === "undefined") return;
+  if (g) localStorage.setItem(SESSION_KEY, JSON.stringify(g));
+  else localStorage.removeItem(SESSION_KEY);
+  emitAuth();
 }
 
 export function getSession(): Guardian | null {
@@ -121,11 +59,100 @@ export function getSession(): Guardian | null {
   }
 }
 
-function setSession(g: Guardian | null) {
-  if (g) localStorage.setItem(SESSION_KEY, JSON.stringify(g));
-  else localStorage.removeItem(SESSION_KEY);
-  window.dispatchEvent(new Event("studentpay:auth"));
+interface ProfileRow {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  business_name: string | null;
+  student_id: string | null;
+  school: string | null;
+  suspended: boolean;
+  students: StudentLink[] | null;
+  address: string | null;
+  occupation: string | null;
+  emergency_name: string | null;
+  emergency_phone: string | null;
+  preferred_language: string | null;
+  date_of_birth: string | null;
+  created_at: string;
 }
+
+function rowToGuardian(row: ProfileRow, email: string, role: Role): Guardian {
+  const students = Array.isArray(row.students) ? row.students : [];
+  return {
+    id: row.id,
+    fullName: row.full_name || email.split("@")[0],
+    email,
+    phone: row.phone || "",
+    studentId: row.student_id || students[0]?.studentId || "",
+    students,
+    createdAt: new Date(row.created_at).getTime(),
+    role,
+    businessName: row.business_name || undefined,
+    suspended: row.suspended,
+    avatarDataUrl: row.avatar_url || undefined,
+    address: row.address || undefined,
+    occupation: row.occupation || undefined,
+    emergencyName: row.emergency_name || undefined,
+    emergencyPhone: row.emergency_phone || undefined,
+    preferredLanguage: row.preferred_language || undefined,
+    dateOfBirth: row.date_of_birth || undefined,
+  };
+}
+
+async function hydrateGuardian(userId: string, email: string): Promise<Guardian | null> {
+  const [{ data: profile, error: pErr }, { data: roles }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+    supabase.from("user_roles").select("role").eq("user_id", userId),
+  ]);
+  if (pErr) throw pErr;
+  if (!profile) return null;
+  const roleList = (roles || []).map((r: { role: Role }) => r.role);
+  const role: Role = roleList.includes("admin")
+    ? "admin"
+    : roleList.includes("vendor")
+    ? "vendor"
+    : roleList.includes("student")
+    ? "student"
+    : "parent";
+  return rowToGuardian(profile as ProfileRow, email, role);
+}
+
+async function refreshCache(): Promise<Guardian | null> {
+  const { data } = await supabase.auth.getUser();
+  const u = data.user;
+  if (!u?.email) {
+    setSessionCache(null);
+    return null;
+  }
+  try {
+    const g = await hydrateGuardian(u.id, u.email);
+    setSessionCache(g);
+    return g;
+  } catch {
+    return null;
+  }
+}
+
+let _authInit = false;
+export function initAuth() {
+  if (_authInit || typeof window === "undefined") return;
+  _authInit = true;
+  // Initial hydration from any existing session.
+  void refreshCache();
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === "SIGNED_OUT") {
+      setSessionCache(null);
+      return;
+    }
+    if (event === "SIGNED_IN" || event === "USER_UPDATED" || event === "TOKEN_REFRESHED") {
+      void refreshCache();
+    }
+  });
+}
+
+// ---------- Sign up / Sign in ----------
 
 export async function signUp(input: {
   fullName: string;
@@ -137,13 +164,9 @@ export async function signUp(input: {
   role?: Role;
   businessName?: string;
 }): Promise<Guardian> {
-  const users = loadUsers();
-  const email = input.email.trim().toLowerCase();
-  if (users.some((u) => u.email === email)) {
-    throw new Error("An account with this email already exists");
-  }
   if (input.password.length < 6) throw new Error("Password must be at least 6 characters");
   const role: Role = input.role || "parent";
+  if (role === "admin") throw new Error("Admin accounts can't be self-created");
 
   const normalized: StudentLink[] = (input.students && input.students.length
     ? input.students
@@ -151,10 +174,9 @@ export async function signUp(input: {
     ? [{ studentId: input.studentId, school: "" }]
     : []
   )
-    .map((s) => ({ studentId: s.studentId.trim().toUpperCase(), school: s.school.trim() }))
+    .map((s) => ({ studentId: s.studentId.trim().toUpperCase(), school: (s.school || "").trim() }))
     .filter((s) => s.studentId.length > 0);
 
-  // Parents and students require a student ID; vendors do not.
   if ((role === "parent" || role === "student") && normalized.length === 0) {
     throw new Error(role === "parent" ? "Please add at least one student" : "Please enter your Student ID");
   }
@@ -162,59 +184,78 @@ export async function signUp(input: {
     throw new Error("Business name is required");
   }
 
-  const guardian: StoredGuardian = {
-    id: crypto.randomUUID(),
-    fullName: input.fullName.trim(),
+  const email = input.email.trim().toLowerCase();
+  const { data, error } = await supabase.auth.signUp({
     email,
-    phone: input.phone.trim(),
-    studentId: normalized[0]?.studentId || "",
-    students: normalized,
-    createdAt: Date.now(),
-    role,
-    businessName: input.businessName?.trim(),
-    passwordHash: await hash(input.password),
-  };
-  users.push(guardian);
-  saveUsers(users);
-  const { passwordHash: _ph, ...session } = guardian;
-  setSession(session);
-  return session;
+    password: input.password,
+    options: {
+      emailRedirectTo: `${window.location.origin}/guardian/auth`,
+      data: {
+        full_name: input.fullName.trim(),
+        phone: input.phone.trim(),
+        role,
+        business_name: input.businessName?.trim(),
+        student_id: normalized[0]?.studentId,
+        school: normalized[0]?.school,
+      },
+    },
+  });
+  if (error) throw error;
+  const userId = data.user?.id;
+  if (!userId) throw new Error("Sign up failed — check your email to confirm your account");
+
+  // Persist the full students list on the profile (trigger only stored the first).
+  if (normalized.length) {
+    await supabase.from("profiles").update({ students: normalized }).eq("id", userId);
+  }
+
+  // If email confirmation is required and no session yet, return a stub.
+  if (!data.session) {
+    return {
+      id: userId,
+      fullName: input.fullName.trim(),
+      email,
+      phone: input.phone.trim(),
+      studentId: normalized[0]?.studentId || "",
+      students: normalized,
+      createdAt: Date.now(),
+      role,
+      businessName: input.businessName?.trim(),
+    };
+  }
+
+  const g = await refreshCache();
+  return g!;
 }
 
-// Seed a default admin account if none exists yet.
-export async function ensureAdminSeed() {
-  if (typeof window === "undefined") return;
-  const users = loadUsers();
-  if (users.some((u) => u.role === "admin")) return;
-  const admin: StoredGuardian = {
-    id: crypto.randomUUID(),
-    fullName: "StudentPay Admin",
-    email: "admin@studentpay.gh",
-    phone: "",
-    studentId: "",
-    students: [],
-    createdAt: Date.now(),
-    role: "admin",
-    passwordHash: await hash("admin123"),
-  };
-  users.push(admin);
-  saveUsers(users);
+export async function signIn(email: string, password: string): Promise<Guardian> {
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email.trim().toLowerCase(),
+    password,
+  });
+  if (error) throw new Error(error.message === "Invalid login credentials" ? "Incorrect email or password" : error.message);
+  const g = await refreshCache();
+  if (!g) throw new Error("Could not load account profile");
+  if (g.suspended) {
+    await supabase.auth.signOut();
+    setSessionCache(null);
+    throw new Error("This account has been suspended. Contact support.");
+  }
+  return g;
 }
 
-export function listAllUsers(): Guardian[] {
-  return loadUsers().map(({ passwordHash: _p, ...rest }) => rest);
+export async function signOut(): Promise<void> {
+  await supabase.auth.signOut();
+  setSessionCache(null);
 }
 
-export function setUserSuspended(id: string, suspended: boolean) {
-  const users = loadUsers();
-  const idx = users.findIndex((u) => u.id === id);
-  if (idx === -1) return;
-  users[idx].suspended = suspended;
-  saveUsers(users);
+// ensureAdminSeed retained for API compatibility; admin creation happens
+// server-side via a migration (a client cannot mint an admin role safely).
+export async function ensureAdminSeed(): Promise<void> {
+  return;
 }
 
-
-const PENDING_STUDENTS_KEY = "studentpay_pending_students_v1";
+// ---------- Google OAuth ----------
 
 export function savePendingStudents(students: StudentLink[]) {
   localStorage.setItem(PENDING_STUDENTS_KEY, JSON.stringify(students));
@@ -230,13 +271,9 @@ export function clearPendingStudents() {
   localStorage.removeItem(PENDING_STUDENTS_KEY);
 }
 
-export async function signInWithGoogle(input?: {
-  students?: StudentLink[];
-}): Promise<Guardian> {
+export async function signInWithGoogle(input?: { students?: StudentLink[] }): Promise<Guardian> {
   const { lovable } = await import("@/integrations/lovable");
-  if (input?.students && input.students.length) {
-    savePendingStudents(input.students);
-  }
+  if (input?.students?.length) savePendingStudents(input.students);
   const result = await lovable.auth.signInWithOAuth("google", {
     redirect_uri: window.location.origin + "/guardian/auth",
   });
@@ -244,103 +281,63 @@ export async function signInWithGoogle(input?: {
     clearPendingStudents();
     throw result.error instanceof Error ? result.error : new Error(String(result.error));
   }
-  // If redirected === true, the browser is navigating away; throw to halt UI.
   throw new Error("Redirecting to Google…");
 }
 
-// Called by the auth page after returning from Google OAuth. Creates a
-// guardian record from the Supabase session if needed.
+// After returning from Google OAuth, hydrate profile & attach any pending students.
 export async function completeGoogleSignIn(): Promise<Guardian | null> {
-  const { supabase } = await import("@/integrations/supabase/client");
   const { data } = await supabase.auth.getUser();
-  const sUser = data.user;
-  if (!sUser?.email) return null;
+  const u = data.user;
+  if (!u?.email) return null;
 
-  const email = sUser.email.toLowerCase();
-  const fullName =
-    (sUser.user_metadata?.full_name as string) ||
-    (sUser.user_metadata?.name as string) ||
-    email.split("@")[0];
+  const pending = loadPendingStudents()
+    .map((s) => ({ studentId: s.studentId.trim().toUpperCase(), school: (s.school || "").trim() }))
+    .filter((s) => s.studentId.length > 0);
 
-  const users = loadUsers();
-  let u = users.find((x) => x.email === email);
-  if (!u) {
-    const pending = loadPendingStudents();
-    const normalized: StudentLink[] = pending
-      .map((s) => ({ studentId: s.studentId.trim().toUpperCase(), school: s.school.trim() }))
-      .filter((s) => s.studentId.length > 0);
-    if (normalized.length === 0) {
-      // No students captured before redirect — sign out of supabase to keep state clean.
-      await supabase.auth.signOut();
-      throw new Error("Add at least one child's Student ID before continuing with Google");
-    }
-    u = {
-      id: sUser.id,
-      fullName,
-      email,
-      phone: (sUser.user_metadata?.phone as string) || "",
-      studentId: normalized[0].studentId,
-      students: normalized,
-      createdAt: Date.now(),
-      passwordHash: await hash(crypto.randomUUID()),
-    };
-    users.push(u);
-    saveUsers(users);
+  if (pending.length) {
+    await supabase
+      .from("profiles")
+      .update({
+        students: pending,
+        student_id: pending[0].studentId,
+        school: pending[0].school,
+      })
+      .eq("id", u.id);
+    clearPendingStudents();
   }
-  clearPendingStudents();
-  if (!u.students || u.students.length === 0) {
-    u.students = [{ studentId: u.studentId, school: "" }];
-    saveUsers(users);
-  }
-  const { passwordHash: _ph, ...session } = u;
-  setSession(session);
-  return session;
+
+  const g = await refreshCache();
+  return g;
 }
 
-export async function signIn(email: string, password: string): Promise<Guardian> {
-  const users = loadUsers();
-  const u = users.find((x) => x.email === email.trim().toLowerCase());
-  if (!u) throw new Error("No account found for this email");
-  const ph = await hash(password);
-  if (ph !== u.passwordHash) throw new Error("Incorrect password");
-  // back-compat: ensure students array exists
-  if (!u.students || u.students.length === 0) {
-    u.students = [{ studentId: u.studentId, school: "" }];
-    saveUsers(users);
-  }
-  const { passwordHash: _ph, ...session } = u;
-  setSession(session);
-  return session;
-}
+// ---------- Profile ----------
 
-export function signOut() {
-  setSession(null);
-}
-
-export function updateProfile(input: {
+export async function updateProfile(input: {
   fullName: string;
   phone: string;
   studentId: string;
-}): Guardian {
+}): Promise<Guardian> {
   const session = getSession();
   if (!session) throw new Error("Not signed in");
   const fullName = input.fullName.trim();
   const phone = input.phone.trim();
   const studentId = input.studentId.trim().toUpperCase();
   if (!fullName) throw new Error("Full name is required");
-  if (!studentId) throw new Error("Student ID is required");
-  const users = loadUsers();
-  const idx = users.findIndex((u) => u.id === session.id);
-  if (idx === -1) throw new Error("Account not found");
-  const existingStudents = users[idx].students || [];
-  const nextStudents: StudentLink[] = existingStudents.length
-    ? [{ studentId, school: existingStudents[0]?.school || "" }, ...existingStudents.slice(1)]
-    : [{ studentId, school: "" }];
-  users[idx] = { ...users[idx], fullName, phone, studentId, students: nextStudents };
-  saveUsers(users);
-  const { passwordHash: _ph, ...updated } = users[idx];
-  setSession(updated);
-  return updated;
+
+  const existing = session.students || [];
+  const nextStudents: StudentLink[] = existing.length
+    ? [{ studentId, school: existing[0]?.school || "" }, ...existing.slice(1)]
+    : studentId
+    ? [{ studentId, school: "" }]
+    : [];
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ full_name: fullName, phone, student_id: studentId || null, students: nextStudents })
+    .eq("id", session.id);
+  if (error) throw error;
+  const g = await refreshCache();
+  return g!;
 }
 
 export type ProfileExtras = Partial<
@@ -356,22 +353,16 @@ export type ProfileExtras = Partial<
   >
 > & { students?: StudentLink[] };
 
-export function updateProfileFull(
-  input: {
-    fullName: string;
-    phone: string;
-  } & ProfileExtras,
-): Guardian {
+export async function updateProfileFull(
+  input: { fullName: string; phone: string } & ProfileExtras,
+): Promise<Guardian> {
   const session = getSession();
   if (!session) throw new Error("Not signed in");
   const fullName = input.fullName.trim();
   const phone = input.phone.trim();
   if (!fullName) throw new Error("Full name is required");
-  const users = loadUsers();
-  const idx = users.findIndex((u) => u.id === session.id);
-  if (idx === -1) throw new Error("Account not found");
 
-  let nextStudents = users[idx].students || [];
+  let nextStudents = session.students || [];
   if (input.students) {
     nextStudents = input.students
       .map((s) => ({
@@ -384,93 +375,119 @@ export function updateProfileFull(
     if (nextStudents.length === 0) throw new Error("Add at least one child");
   }
 
-  users[idx] = {
-    ...users[idx],
-    fullName,
-    phone,
-    students: nextStudents,
-    studentId: nextStudents[0]?.studentId || users[idx].studentId,
-    avatarDataUrl: input.avatarDataUrl ?? users[idx].avatarDataUrl,
-    address: input.address ?? users[idx].address,
-    occupation: input.occupation ?? users[idx].occupation,
-    emergencyName: input.emergencyName ?? users[idx].emergencyName,
-    emergencyPhone: input.emergencyPhone ?? users[idx].emergencyPhone,
-    preferredLanguage: input.preferredLanguage ?? users[idx].preferredLanguage,
-    dateOfBirth: input.dateOfBirth ?? users[idx].dateOfBirth,
-  };
-  saveUsers(users);
-  const { passwordHash: _ph, ...updated } = users[idx];
-  setSession(updated);
-  return updated;
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      full_name: fullName,
+      phone,
+      students: nextStudents,
+      student_id: nextStudents[0]?.studentId || session.studentId || null,
+      avatar_url: input.avatarDataUrl ?? session.avatarDataUrl ?? null,
+      address: input.address ?? session.address ?? null,
+      occupation: input.occupation ?? session.occupation ?? null,
+      emergency_name: input.emergencyName ?? session.emergencyName ?? null,
+      emergency_phone: input.emergencyPhone ?? session.emergencyPhone ?? null,
+      preferred_language: input.preferredLanguage ?? session.preferredLanguage ?? null,
+      date_of_birth: input.dateOfBirth ?? session.dateOfBirth ?? null,
+    })
+    .eq("id", session.id);
+  if (error) throw error;
+  const g = await refreshCache();
+  return g!;
 }
 
-// ---------- Password reset (mock OTP) ----------
-// Since there's no backend yet, the OTP is generated locally and shown to the
-// user (simulating the email). Stored with an expiry in localStorage.
-
-const RESET_KEY = "studentpay_guardian_reset_v1";
-const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
-
-interface ResetRecord {
-  email: string;
-  code: string;
-  expiresAt: number;
+export async function updateStudents(students: StudentLink[]): Promise<Guardian> {
+  const session = getSession();
+  if (!session) throw new Error("Not signed in");
+  const normalized: StudentLink[] = students
+    .map((s) => ({ studentId: s.studentId.trim().toUpperCase(), school: s.school.trim() }))
+    .filter((s) => s.studentId.length > 0);
+  if (normalized.length === 0) throw new Error("Add at least one student");
+  const { error } = await supabase
+    .from("profiles")
+    .update({ students: normalized, student_id: normalized[0].studentId, school: normalized[0].school })
+    .eq("id", session.id);
+  if (error) throw error;
+  const g = await refreshCache();
+  return g!;
 }
 
-function loadResets(): ResetRecord[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(RESET_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-function saveResets(r: ResetRecord[]) {
-  localStorage.setItem(RESET_KEY, JSON.stringify(r));
+// ---------- Password ----------
+
+export async function changePassword(input: {
+  currentPassword: string;
+  newPassword: string;
+}): Promise<void> {
+  const session = getSession();
+  if (!session) throw new Error("Not signed in");
+  if (input.newPassword.length < 6) throw new Error("Password must be at least 6 characters");
+  // Re-verify current password by attempting sign-in.
+  const { error: verifyErr } = await supabase.auth.signInWithPassword({
+    email: session.email,
+    password: input.currentPassword,
+  });
+  if (verifyErr) throw new Error("Current password is incorrect");
+  const { error } = await supabase.auth.updateUser({ password: input.newPassword });
+  if (error) throw error;
 }
 
-function genCode(): string {
-  // 6-digit numeric
-  const n = Math.floor(100000 + Math.random() * 900000);
-  return String(n);
-}
-
-export function requestPasswordReset(email: string): { code: string; email: string } {
-  const users = loadUsers();
+// Password reset via Supabase email link. The old OTP flow is replaced.
+export async function requestPasswordReset(email: string): Promise<{ email: string }> {
   const normalized = email.trim().toLowerCase();
-  const u = users.find((x) => x.email === normalized);
-  if (!u) throw new Error("No account found for this email");
-  const code = genCode();
-  const resets = loadResets().filter((r) => r.email !== normalized);
-  resets.push({ email: normalized, code, expiresAt: Date.now() + OTP_TTL_MS });
-  saveResets(resets);
-  // In a real app, this would email the code. Here we return it so the UI can
-  // show it (mock email delivery).
-  return { code, email: normalized };
+  const { error } = await supabase.auth.resetPasswordForEmail(normalized, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+  if (error) throw error;
+  return { email: normalized };
 }
 
-export function verifyResetCode(email: string, code: string): boolean {
-  const normalized = email.trim().toLowerCase();
-  const rec = loadResets().find((r) => r.email === normalized);
-  if (!rec) throw new Error("No reset request found. Please request a new code.");
-  if (Date.now() > rec.expiresAt) throw new Error("Code expired. Request a new one.");
-  if (rec.code !== code.trim()) throw new Error("Incorrect code");
+export async function resetPassword(input: { newPassword: string }): Promise<void> {
+  if (input.newPassword.length < 6) throw new Error("Password must be at least 6 characters");
+  const { error } = await supabase.auth.updateUser({ password: input.newPassword });
+  if (error) throw error;
+}
+
+// Deprecated: only kept so old imports compile. Recovery uses the email link.
+export function verifyResetCode(_email: string, _code: string): boolean {
   return true;
 }
 
-export async function resetPassword(input: {
-  email: string;
-  code: string;
-  newPassword: string;
-}): Promise<void> {
-  verifyResetCode(input.email, input.code);
-  if (input.newPassword.length < 6) throw new Error("Password must be at least 6 characters");
-  const normalized = input.email.trim().toLowerCase();
-  const users = loadUsers();
-  const idx = users.findIndex((u) => u.email === normalized);
-  if (idx === -1) throw new Error("Account not found");
-  users[idx].passwordHash = await hash(input.newPassword);
-  saveUsers(users);
-  // consume the code
-  saveResets(loadResets().filter((r) => r.email !== normalized));
+// ---------- PIN (still client-side; separate from account password) ----------
+
+export function getPin(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(PIN_KEY);
+}
+
+export async function changePin(input: { currentPin?: string; newPin: string }): Promise<void> {
+  const existing = getPin();
+  if (existing && input.currentPin !== existing) throw new Error("Current PIN is incorrect");
+  if (!/^\d{4}$/.test(input.newPin)) throw new Error("PIN must be 4 digits");
+  localStorage.setItem(PIN_KEY, input.newPin);
+}
+
+// ---------- Admin ----------
+
+export async function listAllUsers(): Promise<Guardian[]> {
+  const [{ data: profiles, error }, { data: roles }] = await Promise.all([
+    supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+    supabase.from("user_roles").select("user_id, role"),
+  ]);
+  if (error) throw error;
+  const roleMap = new Map<string, Role>();
+  for (const r of (roles || []) as { user_id: string; role: Role }[]) {
+    const cur = roleMap.get(r.user_id);
+    // Elevate to the "highest" role for display purposes.
+    const order: Role[] = ["parent", "student", "vendor", "admin"];
+    if (!cur || order.indexOf(r.role) > order.indexOf(cur)) roleMap.set(r.user_id, r.role);
+  }
+  return (profiles || []).map((p) => {
+    const g = rowToGuardian(p as ProfileRow, "", roleMap.get(p.id) || "parent");
+    return { ...g, email: "" };
+  });
+}
+
+export async function setUserSuspended(id: string, suspended: boolean): Promise<void> {
+  const { error } = await supabase.from("profiles").update({ suspended }).eq("id", id);
+  if (error) throw error;
 }
