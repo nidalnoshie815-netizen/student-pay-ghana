@@ -42,17 +42,20 @@ function PaymentCallback() {
     }
     (async () => {
       try {
-        const result = await verifyPaystack({ data: { reference: ref } });
+        const result = (await verifyPaystack({ data: { reference: ref } })) as {
+          status: string;
+          amount: number;
+          metadata: Record<string, string | number | boolean | null>;
+        };
         if (result.status === "success") {
-          const meta = result.metadata as {
-            method?: PaymentMethod;
-            studentId?: string;
-          };
+          const method = (result.metadata?.method as PaymentMethod) || "MTN MoMo";
+          const studentId =
+            (result.metadata?.studentId as string) || account.studentId;
           try {
             addDeposit({
               amount: result.amount,
-              method: meta.method || "MTN MoMo",
-              studentId: meta.studentId || account.studentId,
+              method,
+              studentId,
               parentName: guardian?.fullName ?? "Guardian",
             });
           } catch (e) {

@@ -70,13 +70,17 @@ export const verifyPaystack = createServerFn({ method: "POST" })
         currency: string;
         channel: string;
         paid_at: string | null;
-        metadata: Record<string, unknown> | null;
+        metadata: Record<string, string | number | boolean | null> | string | null;
         customer: { email: string };
       };
     };
     if (!res.ok || !json.status || !json.data) {
       throw new Error(json.message || `Paystack verify failed (${res.status})`);
     }
+    const meta =
+      typeof json.data.metadata === "string" || json.data.metadata === null
+        ? {}
+        : json.data.metadata;
     return {
       status: json.data.status,
       reference: json.data.reference,
@@ -84,7 +88,7 @@ export const verifyPaystack = createServerFn({ method: "POST" })
       currency: json.data.currency,
       channel: json.data.channel,
       paidAt: json.data.paid_at,
-      metadata: json.data.metadata ?? {},
+      metadata: meta as Record<string, string | number | boolean | null>,
       email: json.data.customer.email,
     };
   });
