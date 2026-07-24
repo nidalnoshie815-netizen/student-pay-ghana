@@ -29,6 +29,7 @@ import { Route as SettingsFeedbackRouteImport } from './routes/settings.feedback
 import { Route as SettingsContactRouteImport } from './routes/settings.contact'
 import { Route as SettingsChangePinRouteImport } from './routes/settings.change-pin'
 import { Route as SettingsChangePasswordRouteImport } from './routes/settings.change-password'
+import { Route as PaymentsCallbackRouteImport } from './routes/payments.callback'
 import { Route as GuardianProfileRouteImport } from './routes/guardian.profile'
 import { Route as GuardianForgotPasswordRouteImport } from './routes/guardian.forgot-password'
 import { Route as GuardianAuthRouteImport } from './routes/guardian.auth'
@@ -136,6 +137,11 @@ const SettingsChangePasswordRoute = SettingsChangePasswordRouteImport.update({
   path: '/change-password',
   getParentRoute: () => SettingsRoute,
 } as any)
+const PaymentsCallbackRoute = PaymentsCallbackRouteImport.update({
+  id: '/payments/callback',
+  path: '/payments/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GuardianProfileRoute = GuardianProfileRouteImport.update({
   id: '/guardian/profile',
   path: '/guardian/profile',
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/guardian/auth': typeof GuardianAuthRoute
   '/guardian/forgot-password': typeof GuardianForgotPasswordRoute
   '/guardian/profile': typeof GuardianProfileRoute
+  '/payments/callback': typeof PaymentsCallbackRoute
   '/settings/change-password': typeof SettingsChangePasswordRoute
   '/settings/change-pin': typeof SettingsChangePinRoute
   '/settings/contact': typeof SettingsContactRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/guardian/auth': typeof GuardianAuthRoute
   '/guardian/forgot-password': typeof GuardianForgotPasswordRoute
   '/guardian/profile': typeof GuardianProfileRoute
+  '/payments/callback': typeof PaymentsCallbackRoute
   '/settings/change-password': typeof SettingsChangePasswordRoute
   '/settings/change-pin': typeof SettingsChangePinRoute
   '/settings/contact': typeof SettingsContactRoute
@@ -240,6 +248,7 @@ export interface FileRoutesById {
   '/guardian/auth': typeof GuardianAuthRoute
   '/guardian/forgot-password': typeof GuardianForgotPasswordRoute
   '/guardian/profile': typeof GuardianProfileRoute
+  '/payments/callback': typeof PaymentsCallbackRoute
   '/settings/change-password': typeof SettingsChangePasswordRoute
   '/settings/change-pin': typeof SettingsChangePinRoute
   '/settings/contact': typeof SettingsContactRoute
@@ -270,6 +279,7 @@ export interface FileRouteTypes {
     | '/guardian/auth'
     | '/guardian/forgot-password'
     | '/guardian/profile'
+    | '/payments/callback'
     | '/settings/change-password'
     | '/settings/change-pin'
     | '/settings/contact'
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/guardian/auth'
     | '/guardian/forgot-password'
     | '/guardian/profile'
+    | '/payments/callback'
     | '/settings/change-password'
     | '/settings/change-pin'
     | '/settings/contact'
@@ -325,6 +336,7 @@ export interface FileRouteTypes {
     | '/guardian/auth'
     | '/guardian/forgot-password'
     | '/guardian/profile'
+    | '/payments/callback'
     | '/settings/change-password'
     | '/settings/change-pin'
     | '/settings/contact'
@@ -351,6 +363,7 @@ export interface RootRouteChildren {
   GuardianAuthRoute: typeof GuardianAuthRoute
   GuardianForgotPasswordRoute: typeof GuardianForgotPasswordRoute
   GuardianProfileRoute: typeof GuardianProfileRoute
+  PaymentsCallbackRoute: typeof PaymentsCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -495,6 +508,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsChangePasswordRouteImport
       parentRoute: typeof SettingsRoute
     }
+    '/payments/callback': {
+      id: '/payments/callback'
+      path: '/payments/callback'
+      fullPath: '/payments/callback'
+      preLoaderRoute: typeof PaymentsCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guardian/profile': {
       id: '/guardian/profile'
       path: '/guardian/profile'
@@ -600,17 +620,8 @@ const rootRouteChildren: RootRouteChildren = {
   GuardianAuthRoute: GuardianAuthRoute,
   GuardianForgotPasswordRoute: GuardianForgotPasswordRoute,
   GuardianProfileRoute: GuardianProfileRoute,
+  PaymentsCallbackRoute: PaymentsCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

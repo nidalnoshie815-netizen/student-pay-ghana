@@ -2,9 +2,10 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { addDeposit, formatGHS, type PaymentMethod } from "@/lib/mock-store";
+import { type PaymentMethod } from "@/lib/mock-store";
 import { useGuardian } from "@/hooks/use-guardian";
 import { useStore } from "@/hooks/use-store";
+import { initializePaystack } from "@/lib/paystack.functions";
 
 export interface ProviderConfig {
   method: PaymentMethod;
@@ -14,6 +15,7 @@ export interface ProviderConfig {
   fg: string;
   numberLabel: string;
   numberPlaceholder: string;
+  paystackProvider: "mtn" | "vod" | "atl";
 }
 
 export function ProviderPayForm({
@@ -35,23 +37,31 @@ export function ProviderPayForm({
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) return toast.error("Enter a valid amount");
     if (phone.replace(/\D/g, "").length < 9) return toast.error("Enter a valid phone");
+    if (!guardian?.email) return toast.error("Please sign in first");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1400));
     try {
-      addDeposit({
-        amount: amt,
-        method: config.method,
-        studentId: account.studentId,
-        parentName: guardian?.fullName ?? "Guardian",
+      const callbackUrl = `${window.location.origin}/payments/callback`;
+      const { authorization_url } = await initializePaystack({
+        data: {
+          email: guardian.email,
+          amount: amt,
+          provider: config.paystackProvider,
+          phone,
+          callbackUrl,
+          metadata: {
+            method: config.method,
+            studentId: account.studentId,
+            guardianName: guardian.fullName,
+          },
+        },
       });
-      toast.success(`${formatGHS(amt)} added via ${config.name}`);
-      navigate({ to: "/parent" });
+      window.location.href = authorization_url;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Payment failed");
-    } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <div className="mx-auto max-w-md px-5 pb-32 pt-6">

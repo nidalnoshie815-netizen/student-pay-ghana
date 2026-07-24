@@ -27,6 +27,7 @@ function MtnPage() {
           fg: "var(--brand-mtn-fg)",
           numberLabel: "MTN Number",
           numberPlaceholder: "024 000 0000",
+          paystackProvider: "mtn",
         }}
       />
       <BottomNav />
