@@ -27,6 +27,7 @@ function AirtelTigoPage() {
           fg: "var(--brand-airteltigo-fg)",
           numberLabel: "AirtelTigo Number",
           numberPlaceholder: "027 000 0000",
+          paystackProvider: "atl",
         }}
       />
       <BottomNav />

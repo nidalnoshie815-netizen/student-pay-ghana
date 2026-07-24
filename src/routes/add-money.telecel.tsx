@@ -27,6 +27,7 @@ function TelecelPage() {
           fg: "var(--brand-telecel-fg)",
           numberLabel: "Telecel Number",
           numberPlaceholder: "020 000 0000",
+          paystackProvider: "vod",
         }}
       />
       <BottomNav />
