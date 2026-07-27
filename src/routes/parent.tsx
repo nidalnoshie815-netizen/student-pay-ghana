@@ -34,7 +34,6 @@ function ParentDashboard() {
   const navigate = useNavigate();
   const guardian = useGuardian();
   const { account, transactions } = useStore();
-  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   useEffect(() => {
     if (!guardian) { navigate({ to: "/guardian/auth" }); return; }
