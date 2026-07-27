@@ -1,14 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Logo } from "@/components/Logo";
 import { QuickActions } from "@/components/QuickActions";
 import { BottomNav } from "@/components/BottomNav";
-import {
-  addWithdrawal,
-  formatGHS,
-  type Transaction,
-  type TxCategory,
-} from "@/lib/mock-store";
+import { formatGHS, type Transaction, type TxCategory } from "@/lib/mock-store";
 import { useStore } from "@/hooks/use-store";
 import { useGuardian } from "@/hooks/use-guardian";
 import { WalletQRCard } from "@/components/WalletQRCard";
@@ -17,18 +12,13 @@ import { generateAIAlerts, type AlertLevel } from "@/lib/ai-alerts";
 import {
   ArrowDownLeft,
   ArrowUpRight,
-  Loader2,
   LogOut,
   Sparkles,
-  X,
   CreditCard,
   Wallet,
   Send,
   Store,
-  QrCode,
 } from "lucide-react";
-import { toast } from "sonner";
-import { QRCodeCanvas } from "qrcode.react";
 
 export const Route = createFileRoute("/parent")({
   head: () => ({
