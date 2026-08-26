@@ -16,7 +16,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/70 pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto flex max-w-md items-end justify-between px-4 pt-2">
+      <div className="mx-auto flex max-w-md items-end justify-between gap-1 px-2 pt-2 sm:px-4">
         {leftItems.map((it) => (
           <NavItem key={it.to} {...it} active={pathname === it.to} />
         ))}
