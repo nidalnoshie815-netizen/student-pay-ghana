@@ -109,8 +109,8 @@ function Landing() {
         </section>
 
         {/* FEATURES */}
-        <section id="features" className="border-t border-border py-16">
-          <div className="grid gap-6 md:grid-cols-3">
+        <section id="features" className="border-t border-border py-10 sm:py-16">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
             <Feature
               icon={<Wallet className="h-5 w-5" />}
               title="Parent top-ups"
@@ -130,15 +130,15 @@ function Landing() {
         </section>
 
         {/* HOW */}
-        <section id="how" className="border-t border-border py-16">
-          <h2 className="font-display text-3xl font-bold">How it works</h2>
-          <ol className="mt-8 grid gap-4 md:grid-cols-3">
+        <section id="how" className="border-t border-border py-10 sm:py-16">
+          <h2 className="font-display text-2xl font-bold sm:text-3xl">How it works</h2>
+          <ol className="mt-6 grid gap-3 sm:mt-8 sm:gap-4 md:grid-cols-3">
             {[
               ["01", "Get a Student ID", "Each student receives a unique secure ID code."],
               ["02", "Parent tops up", "Pay via MTN, Vodafone, Telecel or AirtelTigo in GH₵."],
               ["03", "Student withdraws", "Use the ID to withdraw — parent gets notified."],
             ].map(([n, t, d]) => (
-              <li key={n} className="rounded-2xl border border-border bg-card p-6">
+              <li key={n} className="rounded-2xl border border-border bg-card p-5 sm:p-6">
                 <div className="font-mono text-xs text-primary">{n}</div>
                 <div className="mt-2 font-display text-lg font-semibold">{t}</div>
                 <div className="mt-1 text-sm text-muted-foreground">{d}</div>
@@ -148,7 +148,7 @@ function Landing() {
         </section>
       </main>
 
-      <footer className="mx-auto max-w-6xl px-6 py-10 text-center text-xs text-muted-foreground">
+      <footer className="mx-auto max-w-6xl px-4 py-10 sm:px-6 text-center text-xs text-muted-foreground">
         © {new Date().getFullYear()} StudentPay Ghana — Built with care.
       </footer>
     </div>
@@ -157,7 +157,7 @@ function Landing() {
 
 function Feature({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 transition hover:border-primary/50">
+    <div className="rounded-2xl border border-border bg-card p-5 transition hover:border-primary/50 sm:p-6">
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
         {icon}
       </div>
