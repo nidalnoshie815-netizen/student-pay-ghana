@@ -61,11 +61,11 @@ function ParentDashboard() {
         <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-accent/20 blur-3xl" />
       </div>
 
-      <header className="mx-auto flex max-w-md items-center justify-between px-5 py-5">
+      <header className="mx-auto flex max-w-md items-center justify-between gap-3 px-4 py-4 sm:px-5 sm:py-5">
         <Logo />
         <div className="flex items-center gap-2">
-          <Link to="/guardian/profile" className="text-right text-[11px] group">
-            <div className="font-medium text-foreground group-hover:text-primary">
+          <Link to="/guardian/profile" className="group min-w-0 text-right text-[11px]">
+            <div className="truncate font-medium text-foreground group-hover:text-primary">
               {guardian.fullName.split(" ")[0]}
             </div>
             <div className="text-muted-foreground">Guardian</div>
@@ -82,17 +82,17 @@ function ParentDashboard() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-md px-5">
+      <main className="mx-auto max-w-md px-4 sm:px-5">
         {/* Balance card */}
         <section className="rounded-3xl bg-gradient-primary p-5 text-primary-foreground shadow-glow">
           <div className="text-xs opacity-80">Wallet balance</div>
-          <div className="mt-1 font-display text-3xl font-bold">
+          <div className="mt-1 font-display text-[1.75rem] font-bold sm:text-3xl">
             {formatGHS(account.balance)}
           </div>
-          <div className="mt-3 flex items-center justify-between text-xs">
+          <div className="mt-3 flex items-center justify-between gap-3 text-xs">
             <div>
               <div className="opacity-70">Student</div>
-              <div className="font-semibold">{account.studentName}</div>
+              <div className="truncate font-semibold">{account.studentName}</div>
             </div>
             <div className="text-right">
               <div className="opacity-70">ID</div>
