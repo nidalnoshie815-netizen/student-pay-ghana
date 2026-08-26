@@ -53,12 +53,12 @@ function NavItem({
   return (
     <Link
       to={to}
-      className={`flex w-16 flex-col items-center gap-1 py-2 text-[10px] font-medium transition-colors ${
+      className={`flex min-w-0 flex-1 flex-col items-center gap-1 py-2 text-[10px] font-medium transition-colors sm:w-16 sm:flex-none ${
         active ? "text-primary" : "text-muted-foreground hover:text-foreground"
       }`}
     >
-      <Icon className="h-5 w-5" />
-      <span>{label}</span>
+      <Icon className="h-5 w-5 shrink-0" />
+      <span className="w-full truncate text-center">{label}</span>
     </Link>
   );
 }
