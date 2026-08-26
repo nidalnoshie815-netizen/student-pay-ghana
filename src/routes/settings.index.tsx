@@ -143,12 +143,12 @@ function SettingsPage() {
         <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-accent/20 blur-3xl" />
       </div>
 
-      <header className="mx-auto flex max-w-md items-center justify-between px-5 py-5">
+      <header className="mx-auto flex max-w-md items-center justify-between gap-3 px-4 py-4 sm:px-5 sm:py-5">
         <Logo />
         <span className="text-xs text-muted-foreground">Settings</span>
       </header>
 
-      <main className="mx-auto max-w-md px-5">
+      <main className="mx-auto max-w-md px-4 sm:px-5">
         <h1 className="font-display text-2xl font-bold">Settings</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Manage your account, security and preferences.

@@ -64,7 +64,7 @@ export function ProviderPayForm({
 
 
   return (
-    <div className="mx-auto max-w-md px-5 pb-32 pt-6">
+    <div className="mx-auto max-w-md px-4 sm:px-5 pb-32 pt-6">
       <button
         type="button"
         onClick={() => navigate({ to: "/add-money" })}
