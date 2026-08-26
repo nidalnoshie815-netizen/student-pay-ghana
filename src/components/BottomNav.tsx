@@ -16,7 +16,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/70 pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto flex max-w-md items-end justify-between px-4 pt-2">
+      <div className="mx-auto flex max-w-md items-end justify-between gap-1 px-2 pt-2 sm:px-4">
         {leftItems.map((it) => (
           <NavItem key={it.to} {...it} active={pathname === it.to} />
         ))}
@@ -53,12 +53,12 @@ function NavItem({
   return (
     <Link
       to={to}
-      className={`flex w-16 flex-col items-center gap-1 py-2 text-[10px] font-medium transition-colors ${
+      className={`flex min-w-0 flex-1 flex-col items-center gap-1 py-2 text-[10px] font-medium transition-colors sm:w-16 sm:flex-none ${
         active ? "text-primary" : "text-muted-foreground hover:text-foreground"
       }`}
     >
-      <Icon className="h-5 w-5" />
-      <span>{label}</span>
+      <Icon className="h-5 w-5 shrink-0" />
+      <span className="w-full truncate text-center">{label}</span>
     </Link>
   );
 }

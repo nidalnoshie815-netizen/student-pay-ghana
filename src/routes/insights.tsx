@@ -29,7 +29,7 @@ function InsightsPage() {
 
   return (
     <div className="relative min-h-screen pb-24">
-      <div className="mx-auto max-w-md px-5 pt-6">
+      <div className="mx-auto max-w-md px-4 sm:px-5 pt-6">
         <Link to="/parent" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back
         </Link>

@@ -54,7 +54,7 @@ function AddMoneyPage() {
         <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
       </div>
 
-      <div className="mx-auto max-w-md px-5 pt-6">
+      <div className="mx-auto max-w-md px-4 sm:px-5 pt-6">
         <Link to="/parent" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back
         </Link>

@@ -55,7 +55,7 @@ function VendorDashboard() {
 
   return (
     <div className="min-h-screen pb-24">
-      <header className="mx-auto flex max-w-4xl items-center justify-between px-6 py-6">
+      <header className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-6">
         <Logo />
         <div className="flex items-center gap-3">
           <button
@@ -74,14 +74,14 @@ function VendorDashboard() {
             onClick={() => { signOut(); toast.success("Signed out"); }}
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
           >
-            <LogOut className="h-4 w-4" /> Sign out
+            <LogOut className="h-4 w-4 shrink-0" /> <span className="hidden sm:inline">Sign out</span>
           </button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-6 space-y-6">
+      <main className="mx-auto max-w-4xl space-y-5 px-4 sm:space-y-6 sm:px-6">
         {/* Header card */}
-        <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
+        <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-primary/10 p-2 text-primary">
               <Store className="h-5 w-5" />
@@ -99,7 +99,7 @@ function VendorDashboard() {
         </section>
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2">
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
           <TabBtn active={tab === "scan"} onClick={() => setTab("scan")} icon={<ScanLine className="h-3.5 w-3.5" />}>Scan / Charge</TabBtn>
           <TabBtn active={tab === "withdraw"} onClick={() => setTab("withdraw")} icon={<ArrowUpFromLine className="h-3.5 w-3.5" />}>Withdrawal</TabBtn>
           <TabBtn active={tab === "float"} onClick={() => setTab("float")} icon={<Wallet className="h-3.5 w-3.5" />}>Float</TabBtn>
@@ -136,7 +136,7 @@ function TabBtn({ active, onClick, icon, children }: { active: boolean; onClick:
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+      className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
         active
           ? "border-primary bg-primary/10 text-primary"
           : "border-border text-muted-foreground hover:text-foreground"
@@ -150,7 +150,7 @@ function TabBtn({ active, onClick, icon, children }: { active: boolean; onClick:
 
 function Card({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
       <div className="flex items-center gap-2 mb-4">
         {icon}
         <h2 className="font-semibold">{title}</h2>

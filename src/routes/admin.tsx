@@ -49,19 +49,19 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen pb-16">
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
+      <header className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-6">
         <Logo />
         <button
           onClick={async () => { await signOut(); toast.success("Signed out"); }}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
-          <LogOut className="h-4 w-4" /> Sign out
+          <LogOut className="h-4 w-4 shrink-0" /> <span className="hidden sm:inline">Sign out</span>
         </button>
       </header>
 
 
-      <main className="mx-auto max-w-5xl px-6 space-y-6">
-        <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
+      <main className="mx-auto max-w-5xl space-y-5 px-4 sm:space-y-6 sm:px-6">
+        <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-primary/10 p-2 text-primary">
               <ShieldCheck className="h-5 w-5" />
@@ -79,15 +79,15 @@ function AdminDashboard() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
+        <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
           <div className="flex items-center gap-2 mb-4">
             <Users className="h-4 w-4 text-primary" />
             <h2 className="font-semibold">Users ({users.length})</h2>
           </div>
           <div className="divide-y divide-border">
             {users.map((u) => (
-              <div key={u.id} className="flex items-center justify-between py-3">
-                <div className="min-w-0">
+              <div key={u.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{u.fullName}</p>
                   <p className="truncate text-xs text-muted-foreground">
                     {u.email} · {ROLE_LABEL[(u.role || "parent") as Role]}
@@ -124,7 +124,7 @@ function AdminDashboard() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
+        <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
           <div className="flex items-center gap-2 mb-4">
             <ShieldAlert className="h-4 w-4 text-primary" />
             <h2 className="font-semibold">Recent transactions</h2>
