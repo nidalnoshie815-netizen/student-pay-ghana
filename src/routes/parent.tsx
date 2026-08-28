@@ -219,33 +219,34 @@ function CategoryTxRow({ tx }: { tx: Transaction }) {
     tx.category ?? (isDeposit ? "Wallet Funding" : "Vendor Payment");
   const Icon = categoryIcon(category);
   return (
-    <div className="flex items-center gap-3 p-4">
+    <div className="flex items-center gap-3 p-3.5 sm:p-4">
       <div
-        className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10 ${
           isDeposit ? "bg-primary/15 text-primary" : "bg-warning/15 text-warning"
         }`}
       >
         <Icon className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-sm font-medium">{category}</div>
-        <div className="truncate text-xs text-muted-foreground">
+        <div className="truncate text-sm font-medium">{category}</div>
+        <div className="truncate text-[11px] text-muted-foreground sm:text-xs">
           {tx.note ?? tx.method ?? "—"} · {timeAgo(tx.createdAt)}
         </div>
       </div>
-      <div className="flex items-center gap-1.5">
+      <div className="flex shrink-0 items-center gap-1.5">
         {isDeposit ? (
           <ArrowDownLeft className="h-3.5 w-3.5 text-primary" />
         ) : (
           <ArrowUpRight className="h-3.5 w-3.5 text-warning" />
         )}
         <span
-          className={`font-mono text-sm font-semibold ${
+          className={`font-mono text-[13px] font-semibold sm:text-sm ${
             isDeposit ? "text-primary" : "text-foreground"
           }`}
         >
           {isDeposit ? "+" : "−"} {formatGHS(tx.amount)}
         </span>
+
       </div>
     </div>
   );

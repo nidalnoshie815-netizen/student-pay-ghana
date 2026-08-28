@@ -201,26 +201,27 @@ function GuardianProfile() {
         <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-accent/20 blur-3xl" />
       </div>
 
-      <header className="mx-auto flex max-w-3xl items-center justify-between px-6 py-6">
+      <header className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-6">
         <Logo />
         <Link
           to="/parent"
-          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-foreground"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Dashboard
         </Link>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6">
+      <main className="mx-auto max-w-3xl px-4 sm:px-6">
         {/* Hero card */}
         <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-card">
           <div className="relative h-28 bg-gradient-primary">
             <div className="absolute inset-0 opacity-30 [background:radial-gradient(circle_at_20%_20%,white_0%,transparent_40%)]" />
           </div>
-          <div className="px-6 pb-6">
-            <div className="-mt-12 flex items-end justify-between gap-4">
+          <div className="px-4 pb-6 sm:px-6">
+            <div className="-mt-12 flex flex-wrap items-end justify-between gap-3">
               <div className="relative">
-                <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border-4 border-card bg-muted text-2xl font-bold text-foreground shadow-card">
+                <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border-4 border-card bg-muted text-2xl font-bold text-foreground shadow-card sm:h-24 sm:w-24">
+
                   {form.avatarDataUrl ? (
                     <img src={form.avatarDataUrl} alt="Avatar" className="h-full w-full object-cover" />
                   ) : (

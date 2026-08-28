@@ -71,27 +71,29 @@ function TxRow({ tx }: { tx: Transaction }) {
   const isDeposit = tx.type === "deposit";
   const category = tx.category ?? (isDeposit ? "Wallet Funding" : "Vendor Payment");
   return (
-    <div className="flex items-center gap-3 p-4">
+    <div className="flex items-center gap-3 p-3.5 sm:p-4">
       <div
-        className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10 ${
           isDeposit ? "bg-primary/15 text-primary" : "bg-warning/15 text-warning"
         }`}
       >
         {isDeposit ? <ArrowDownLeft className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-sm font-medium">{category}</div>
-        <div className="text-xs text-muted-foreground">
+        <div className="truncate text-sm font-medium">{category}</div>
+        <div className="truncate text-[11px] text-muted-foreground sm:text-xs">
           {tx.note ?? tx.method ?? "—"} · {timeAgo(tx.createdAt)}
         </div>
       </div>
       <div
-        className={`font-mono text-sm font-semibold ${
+        className={`shrink-0 font-mono text-[13px] font-semibold sm:text-sm ${
           isDeposit ? "text-primary" : "text-foreground"
         }`}
       >
         {isDeposit ? "+" : "−"} {formatGHS(tx.amount)}
       </div>
+    </div>
+
     </div>
   );
 }
