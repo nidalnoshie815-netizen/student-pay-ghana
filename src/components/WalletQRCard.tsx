@@ -93,29 +93,30 @@ export function WalletQRCard({ studentId, studentName }: Props) {
 
   return (
     <>
-      <section className="rounded-3xl border border-primary/30 bg-card p-5 shadow-card">
-        <div className="flex items-center justify-between">
-          <div>
+      <section className="rounded-3xl border border-primary/30 bg-card p-4 shadow-card sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
-              <ShieldCheck className="h-3 w-3" />
+              <ShieldCheck className="h-3 w-3 shrink-0" />
               Wallet QR
             </div>
             <div className="mt-1 font-display text-sm font-bold">Scan to pay or withdraw</div>
           </div>
           <button
             onClick={() => setExpanded(true)}
-            className="rounded-lg border border-border p-2 text-muted-foreground hover:text-foreground"
+            className="shrink-0 rounded-lg border border-border p-2 text-muted-foreground hover:text-foreground"
             aria-label="Expand QR"
           >
             <Maximize2 className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="mt-4 flex items-center gap-4">
-          <div className={`rounded-2xl bg-white p-3 shadow-sm ${expired ? "opacity-40" : ""}`}>
+        <div className="mt-4 flex flex-col items-center gap-4 min-[380px]:flex-row min-[380px]:items-center">
+          <div className={`shrink-0 rounded-2xl bg-white p-3 shadow-sm ${expired ? "opacity-40" : ""}`}>
             <QRCodeCanvas value={payload} size={128} bgColor="#ffffff" fgColor="#000000" level="H" />
           </div>
-          <div className="min-w-0 flex-1">
+          <div className="w-full min-w-0 flex-1">
+
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Student</div>
             <div className="truncate text-sm font-semibold">{studentName}</div>
             <div className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground">Token</div>
