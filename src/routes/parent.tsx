@@ -6,7 +6,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { formatGHS, type Transaction, type TxCategory } from "@/lib/mock-store";
 import { useStore } from "@/hooks/use-store";
 import { useGuardian } from "@/hooks/use-guardian";
-import { WalletQRCard } from "@/components/WalletQRCard";
+
 import { signOut } from "@/lib/guardian-auth";
 import { generateAIAlerts, type AlertLevel } from "@/lib/ai-alerts";
 import {
@@ -101,10 +101,6 @@ function ParentDashboard() {
           </div>
         </section>
 
-        {/* Wallet QR - prominent */}
-        <section className="mt-5">
-          <WalletQRCard studentId={account.studentId} studentName={account.studentName} />
-        </section>
 
         {/* Quick actions */}
         <section className="mt-5">
