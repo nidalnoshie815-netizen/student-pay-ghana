@@ -185,14 +185,20 @@ function GuardianAuth() {
                     required
                   />
                 </Field>
-                <Field label="Phone number">
+                <Field label={role === "student" ? "Guardian's phone number" : "Phone number"}>
                   <input
+                    type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="024 555 8821"
                     className="input-field"
                     required
                   />
+                  {role === "student" && (
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      Enter the phone number of the parent or guardian who manages your wallet — the same number they'll register with.
+                    </p>
+                  )}
                 </Field>
                 {role === "vendor" && (
                   <Field label="Business name">
