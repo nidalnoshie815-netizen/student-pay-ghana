@@ -4,7 +4,7 @@ import { useRequireRole } from "@/lib/roles";
 import { useStore } from "@/hooks/use-store";
 import { formatGHS } from "@/lib/mock-store";
 import { signOut } from "@/lib/guardian-auth";
-import { WalletQRCard } from "@/components/WalletQRCard";
+
 import { LogOut, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 
@@ -62,9 +62,6 @@ function StudentDashboard() {
           </div>
         </section>
 
-        {linked?.studentId && (
-          <WalletQRCard studentId={linked.studentId} studentName={user.fullName} />
-        )}
 
         <div className="text-center text-xs text-muted-foreground">
           <Link to="/settings" className="hover:text-foreground">Settings</Link>
