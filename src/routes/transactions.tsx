@@ -93,8 +93,6 @@ function TxRow({ tx }: { tx: Transaction }) {
         {isDeposit ? "+" : "−"} {formatGHS(tx.amount)}
       </div>
     </div>
-
-    </div>
   );
 }
 
