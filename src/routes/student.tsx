@@ -1,517 +1,752 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
+  ArrowDownLeft,
+  ArrowLeft,
+  ArrowUpRight,
   Bell,
+  CheckCircle2,
+  CreditCard,
   Eye,
   EyeOff,
-  GraduationCap,
   Home,
+  KeyRound,
+  Lock,
   LogOut,
   Receipt,
+  Snowflake,
   User,
-  X,
-  ArrowDownLeft,
-  ArrowUpRight,
-  Landmark,
+  Wallet,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useRequireRole } from "@/lib/roles";
-import { useStore } from "@/hooks/use-store";
-import { formatGHS, type Transaction } from "@/lib/mock-store";
+import { formatGHS } from "@/lib/mock-store";
 import { signOut } from "@/lib/guardian-auth";
 import { toast } from "sonner";
+import {
+  MOCK_STUDENT,
+  MOCK_TRANSACTIONS,
+  formatDate,
+  formatDateTime,
+  formatTime,
+  makeRef,
+  type StudentTx,
+} from "@/lib/student-mock";
 
 export const Route = createFileRoute("/student")({
   head: () => ({
     meta: [
-      { title: "Student Dashboard — StudentPay" },
+      { title: "Student Dashboard — Student Pay" },
       {
         name: "description",
         content:
-          "Check your balance and withdraw money at a Student Pay POS using your card/chip.",
+          "Check your Student Pay balance, withdraw at an authorized POS, view your student card and track transactions.",
       },
+      { property: "og:title", content: "Student Dashboard — Student Pay" },
+      {
+        property: "og:description",
+        content:
+          "Balance, POS withdrawals, card status and transaction history for Student Pay students.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: StudentDashboard,
+  component: StudentApp,
 });
 
-type Tab = "home" | "transactions" | "profile";
+type Tab = "home" | "withdraw" | "transactions" | "profile";
+type WithdrawStep = "amount" | "confirm" | "success";
 
-function StudentDashboard() {
+function StudentApp() {
   const user = useRequireRole("student");
-  const state = useStore();
+
   const [tab, setTab] = useState<Tab>("home");
+  const [showCard, setShowCard] = useState(false);
   const [showBalance, setShowBalance] = useState(true);
-  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [balance, setBalance] = useState(MOCK_STUDENT.balance);
+  const [txs, setTxs] = useState<StudentTx[]>(MOCK_TRANSACTIONS);
+  const [frozen, setFrozen] = useState(false);
+
+  const [step, setStep] = useState<WithdrawStep>("amount");
   const [amount, setAmount] = useState("");
-  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [receipt, setReceipt] = useState<StudentTx | null>(null);
 
-  const linked = user?.students?.[0];
-  const balance =
-    state.account.studentId === linked?.studentId ? state.account.balance : 250;
-
-  const myTransactions = useMemo(() => {
-    if (!linked?.studentId) return [];
-    return state.transactions.filter((t) => t.studentId === linked.studentId);
-  }, [state.transactions, linked?.studentId]);
+  const profile = {
+    ...MOCK_STUDENT,
+    name: user?.fullName || MOCK_STUDENT.name,
+    studentId: user?.students?.[0]?.studentId || MOCK_STUDENT.studentId,
+    school: user?.students?.[0]?.school || MOCK_STUDENT.school,
+    phone: user?.phone || MOCK_STUDENT.phone,
+    email: user?.email || MOCK_STUDENT.email,
+  };
+  const firstName = profile.name.split(" ")[0];
 
   if (!user) return null;
 
   const balanceText = showBalance ? formatGHS(balance) : "GH₵ ••••••";
 
-  return (
-    <div className="relative min-h-screen pb-24">
-      {/* ambient gradient */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(60%_100%_at_50%_0%,oklch(0.78_0.22_145/0.14),transparent)]" />
+  function openWithdraw() {
+    setStep("amount");
+    setAmount("");
+    setReceipt(null);
+    setShowCard(false);
+    setTab("withdraw");
+  }
 
-      {/* Header */}
-      <header className="mx-auto flex max-w-md items-center justify-between gap-3 px-4 py-5 sm:px-5">
-        <Logo />
-        <div className="flex items-center gap-2">
-          <button
-            aria-label="Notifications"
-            onClick={() => toast.info("No new notifications")}
-            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition hover:text-foreground"
-          >
-            <Bell className="h-4.5 w-4.5" />
-            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-primary" />
-          </button>
-          <button
-            aria-label="Profile"
-            onClick={() => setTab("profile")}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow"
-          >
-            <User className="h-4.5 w-4.5" />
-          </button>
+  function confirmWithdraw() {
+    const value = Number(amount);
+    const tx: StudentTx = {
+      id: crypto.randomUUID(),
+      ref: makeRef(),
+      type: "POS Withdrawal",
+      direction: "out",
+      amount: value,
+      at: Date.now(),
+      status: "Successful",
+      detail: "Authorized Student Pay POS",
+    };
+    setBalance((b) => b - value);
+    setTxs((prev) => [tx, ...prev]);
+    setReceipt(tx);
+    setStep("success");
+  }
+
+  return (
+    <div className="relative min-h-screen pb-28">
+      <header className="mx-auto flex max-w-md items-center justify-between gap-3 px-4 pt-6 sm:px-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <Logo className="h-8 w-8 shrink-0" />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold leading-tight">
+              Welcome, {firstName}
+            </p>
+            <p className="truncate font-mono text-[11px] text-muted-foreground">
+              {profile.studentId}
+            </p>
+          </div>
         </div>
+        <button
+          type="button"
+          aria-label="Notifications"
+          onClick={() => toast("No new notifications")}
+          className="relative flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition hover:text-foreground"
+        >
+          <Bell className="h-5 w-5" />
+          <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-primary" />
+        </button>
       </header>
 
-      <main className="mx-auto max-w-md space-y-5 px-4 sm:px-5">
-        {tab === "home" && (
-          <>
-            {/* Greeting */}
-            <div>
-              <p className="text-xs text-muted-foreground">Welcome back</p>
-              <h1 className="truncate font-display text-xl font-bold">
-                {user.fullName}
-              </h1>
-            </div>
-
-            {/* Balance card */}
-            <section className="rounded-3xl border border-border bg-card p-6 shadow-card">
-              <div className="flex items-center justify-between">
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Available Balance
-                </p>
-                <button
-                  onClick={() => setShowBalance((s) => !s)}
-                  aria-label={showBalance ? "Hide balance" : "Show balance"}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-muted-foreground transition hover:text-foreground"
-                >
-                  {showBalance ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-              <p className="mt-2 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-                {balanceText}
-              </p>
-              <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <GraduationCap className="h-3.5 w-3.5 shrink-0 text-primary" />
-                <span className="truncate">
-                  {linked?.studentId || "—"} · {linked?.school || "School not set"}
-                </span>
-              </p>
-            </section>
-
-            {/* Withdraw at POS */}
-            <button
-              onClick={() => setWithdrawOpen(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-primary px-6 py-4 font-display text-base font-bold text-primary-foreground shadow-glow transition hover:opacity-95 active:scale-[0.99]"
-            >
-              <Landmark className="h-5 w-5" />
-              Withdraw at POS
-            </button>
-
-            {/* Recent transactions */}
-            <section>
-              <div className="mb-2 flex items-center justify-between">
-                <h2 className="font-display text-sm font-semibold">
-                  Recent Transactions
-                </h2>
-                <button
-                  onClick={() => setTab("transactions")}
-                  className="text-xs font-medium text-primary hover:underline"
-                >
-                  View all
-                </button>
-              </div>
-              <div className="divide-y divide-border rounded-2xl border border-border bg-card">
-                {myTransactions.length === 0 && (
-                  <p className="p-6 text-center text-sm text-muted-foreground">
-                    No transactions yet
-                  </p>
-                )}
-                {myTransactions.slice(0, 4).map((t) => (
-                  <TxRow key={t.id} tx={t} onTap={() => setSelectedTx(t)} />
-                ))}
-              </div>
-            </section>
-          </>
-        )}
-
-        {tab === "transactions" && (
-          <section>
-            <h1 className="font-display text-2xl font-bold">Transactions</h1>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Tap any transaction to see details
-            </p>
-            <div className="mt-4 divide-y divide-border rounded-2xl border border-border bg-card">
-              {myTransactions.length === 0 && (
-                <p className="p-6 text-center text-sm text-muted-foreground">
-                  No transactions yet
-                </p>
-              )}
-              {myTransactions.map((t) => (
-                <TxRow key={t.id} tx={t} onTap={() => setSelectedTx(t)} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {tab === "profile" && (
-          <section className="space-y-4">
-            <h1 className="font-display text-2xl font-bold">Profile</h1>
-
-            <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-5 shadow-card">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-primary font-display text-lg font-bold text-primary-foreground shadow-glow">
-                {user.fullName
-                  .split(" ")
-                  .map((n) => n[0])
-                  .slice(0, 2)
-                  .join("")
-                  .toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <p className="truncate font-display text-lg font-semibold">
-                  {user.fullName}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {user.email}
-                </p>
-              </div>
-            </div>
-
-            <div className="divide-y divide-border rounded-2xl border border-border bg-card">
-              <ProfileRow label="Student ID" value={linked?.studentId || "—"} mono />
-              <ProfileRow label="School" value={linked?.school || "Not set"} />
-              <ProfileRow label="Phone Number" value={user.phone || "—"} />
-              <ProfileRow
-                label="Account Status"
-                value="Active"
-                valueClass="text-primary"
-              />
-            </div>
-
-            <button
-              onClick={() => {
-                signOut();
-                toast.success("Signed out");
-              }}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-destructive/40 bg-destructive/10 px-6 py-3.5 text-sm font-semibold text-destructive transition hover:bg-destructive/20"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </button>
-
-            <p className="text-center text-xs text-muted-foreground">
-              <Link to="/settings" className="hover:text-foreground">
-                App settings
-              </Link>
-            </p>
-          </section>
+      <main className="mx-auto max-w-md px-4 pt-5 sm:px-5">
+        {showCard ? (
+          <CardScreen
+            profile={profile}
+            frozen={frozen}
+            onToggleFreeze={() => {
+              setFrozen((f) => !f);
+              toast.success(frozen ? "Card unfrozen" : "Card frozen");
+            }}
+            onBack={() => setShowCard(false)}
+          />
+        ) : tab === "home" ? (
+          <HomeScreen
+            balanceText={balanceText}
+            showBalance={showBalance}
+            onToggleBalance={() => setShowBalance((s) => !s)}
+            onWithdraw={openWithdraw}
+            onCard={() => setShowCard(true)}
+            txs={txs.slice(0, 4)}
+            onSeeAll={() => setTab("transactions")}
+          />
+        ) : tab === "withdraw" ? (
+          <WithdrawScreen
+            step={step}
+            amount={amount}
+            setAmount={setAmount}
+            balance={balance}
+            receipt={receipt}
+            onContinue={() => setStep("confirm")}
+            onBack={() => setStep("amount")}
+            onConfirm={confirmWithdraw}
+            onDone={() => setTab("home")}
+          />
+        ) : tab === "transactions" ? (
+          <TransactionsScreen txs={txs} />
+        ) : (
+          <ProfileScreen profile={profile} />
         )}
       </main>
 
-      {/* Withdraw at POS modal */}
-      {withdrawOpen && (
-        <Modal onClose={() => setWithdrawOpen(false)} title="Withdraw at POS">
-          <div className="rounded-2xl border border-border bg-secondary/40 p-4 text-center">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">
-              Available Balance
-            </p>
-            <p className="mt-1 font-display text-2xl font-bold">{balanceText}</p>
-          </div>
-
-          <label className="mt-4 block">
-            <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
-              Amount to Withdraw (GH₵)
-            </span>
-            <input
-              type="number"
-              min="1"
-              inputMode="decimal"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="e.g. 50"
-              className="input-field text-lg font-semibold"
-            />
-          </label>
-
-          <button
-            onClick={() => {
-              const amt = Number(amount);
-              if (!amt || amt <= 0) {
-                toast.error("Enter a valid amount");
-                return;
-              }
-              if (amt > balance) {
-                toast.error("Amount exceeds your available balance");
-                return;
-              }
-              toast.success(
-                `Withdrawal of ${formatGHS(amt)} ready. Visit a Student Pay POS agent to complete it.`
-              );
-              setWithdrawOpen(false);
-              setAmount("");
-            }}
-            className="mt-4 w-full rounded-2xl bg-gradient-primary px-6 py-3.5 font-display text-sm font-bold text-primary-foreground shadow-glow transition hover:opacity-95 active:scale-[0.99]"
-          >
-            Confirm Withdrawal
-          </button>
-
-          <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
-            Visit an authorized Student Pay POS agent and use your Student Pay
-            card/chip to complete the withdrawal.
-          </p>
-        </Modal>
-      )}
-
-      {/* Transaction details modal */}
-      {selectedTx && (
-        <Modal onClose={() => setSelectedTx(null)} title="Transaction Details">
-          <div className="flex flex-col items-center py-2">
-            <div
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
-                selectedTx.type === "deposit"
-                  ? "bg-primary/15 text-primary"
-                  : "bg-warning/15 text-warning"
-              }`}
-            >
-              {selectedTx.type === "deposit" ? (
-                <ArrowDownLeft className="h-6 w-6" />
-              ) : (
-                <ArrowUpRight className="h-6 w-6" />
-              )}
-            </div>
-            <p className="mt-3 font-display text-2xl font-bold">
-              {selectedTx.type === "deposit" ? "+" : "−"}
-              {formatGHS(selectedTx.amount)}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {selectedTx.type === "deposit" ? "Received" : "Successful"}
-            </p>
-          </div>
-          <div className="mt-2 divide-y divide-border rounded-2xl border border-border">
-            <DetailRow
-              label="Type"
-              value={selectedTx.category ?? (selectedTx.type === "deposit" ? "Wallet Funding" : "POS Withdrawal")}
-            />
-            {selectedTx.note && <DetailRow label="Note" value={selectedTx.note} />}
-            {selectedTx.method && <DetailRow label="Method" value={selectedTx.method} />}
-            <DetailRow
-              label="Status"
-              value={selectedTx.status === "completed" ? "Successful" : "Pending"}
-              valueClass="text-primary"
-            />
-            <DetailRow
-              label="Date"
-              value={new Date(selectedTx.createdAt).toLocaleString("en-GH", {
-                dateStyle: "medium",
-                timeStyle: "short",
-              })}
-            />
-            <DetailRow label="Reference" value={selectedTx.id.slice(0, 8)} mono />
-          </div>
-        </Modal>
-      )}
-
-      {/* Student bottom nav: Home | Transactions | Profile */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:bg-card/70">
-        <div className="mx-auto flex max-w-md items-stretch justify-around px-2 pt-1">
-          <StudentNavItem
-            label="Home"
-            icon={Home}
-            active={tab === "home"}
-            onClick={() => setTab("home")}
-          />
-          <StudentNavItem
-            label="Transactions"
-            icon={Receipt}
-            active={tab === "transactions"}
-            onClick={() => setTab("transactions")}
-          />
-          <StudentNavItem
-            label="Profile"
-            icon={User}
-            active={tab === "profile"}
-            onClick={() => setTab("profile")}
-          />
-        </div>
-      </nav>
+      <StudentNav
+        tab={tab}
+        onChange={(t) => {
+          setShowCard(false);
+          if (t === "withdraw") openWithdraw();
+          else setTab(t);
+        }}
+      />
     </div>
   );
 }
 
-function StudentNavItem({
-  label,
-  icon: Icon,
-  active,
-  onClick,
+/* ---------------- Home ---------------- */
+
+function HomeScreen({
+  balanceText,
+  showBalance,
+  onToggleBalance,
+  onWithdraw,
+  onCard,
+  txs,
+  onSeeAll,
 }: {
-  label: string;
-  icon: typeof Home;
-  active: boolean;
-  onClick: () => void;
+  balanceText: string;
+  showBalance: boolean;
+  onToggleBalance: () => void;
+  onWithdraw: () => void;
+  onCard: () => void;
+  txs: StudentTx[];
+  onSeeAll: () => void;
 }) {
   return (
-    <button
-      onClick={onClick}
-      className={`flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2 text-[10px] font-medium leading-tight transition-colors ${
-        active ? "text-primary" : "text-muted-foreground hover:text-foreground"
-      }`}
-    >
-      <Icon className="h-5 w-5 shrink-0" />
-      <span className="w-full truncate text-center">{label}</span>
-    </button>
+    <div className="space-y-5 animate-in fade-in duration-300">
+      <section className="rounded-3xl border border-border bg-gradient-primary p-5 text-primary-foreground shadow-glow sm:p-6">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-medium uppercase tracking-wide opacity-80">
+            Available Balance
+          </p>
+          <button
+            type="button"
+            onClick={onToggleBalance}
+            aria-label={showBalance ? "Hide balance" : "Show balance"}
+            className="rounded-full bg-black/10 p-2"
+          >
+            {showBalance ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          </button>
+        </div>
+        <p className="mt-2 font-mono text-[2rem] font-bold leading-tight sm:text-4xl">
+          {balanceText}
+        </p>
+        <p className="mt-1 text-xs opacity-80">Student Pay wallet</p>
+      </section>
+
+      <section className="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={onWithdraw}
+          className="flex flex-col items-start gap-2 rounded-2xl bg-primary p-4 text-left text-primary-foreground transition active:scale-[0.98]"
+        >
+          <Wallet className="h-6 w-6" />
+          <span className="text-sm font-semibold">Withdraw</span>
+          <span className="text-[11px] opacity-80">At an authorized POS</span>
+        </button>
+        <button
+          type="button"
+          onClick={onCard}
+          className="flex flex-col items-start gap-2 rounded-2xl border border-border bg-card p-4 text-left transition active:scale-[0.98]"
+        >
+          <CreditCard className="h-6 w-6 text-primary" />
+          <span className="text-sm font-semibold">My Card</span>
+          <span className="text-[11px] text-muted-foreground">View card status</span>
+        </button>
+      </section>
+
+      <section>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold">Recent Transactions</h2>
+          <button
+            type="button"
+            onClick={onSeeAll}
+            className="text-xs text-primary hover:underline"
+          >
+            See all
+          </button>
+        </div>
+        <div className="mt-3 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+          {txs.map((t) => (
+            <TxRow key={t.id} tx={t} />
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }
 
-function TxRow({ tx, onTap }: { tx: Transaction; onTap: () => void }) {
-  const isDeposit = tx.type === "deposit";
-  const label =
-    tx.category ?? (isDeposit ? "School Allowance" : "POS Withdrawal");
+/* ---------------- Withdraw ---------------- */
+
+const QUICK = [20, 50, 100, 200];
+
+function WithdrawScreen({
+  step,
+  amount,
+  setAmount,
+  balance,
+  receipt,
+  onContinue,
+  onBack,
+  onConfirm,
+  onDone,
+}: {
+  step: WithdrawStep;
+  amount: string;
+  setAmount: (v: string) => void;
+  balance: number;
+  receipt: StudentTx | null;
+  onContinue: () => void;
+  onBack: () => void;
+  onConfirm: () => void;
+  onDone: () => void;
+}) {
+  const value = Number(amount);
+  const valid = value > 0 && value <= balance;
+
+  if (step === "success" && receipt) {
+    return (
+      <div className="animate-in fade-in duration-300 space-y-5 text-center">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/15">
+          <CheckCircle2 className="h-11 w-11 text-primary" />
+        </div>
+        <div>
+          <h1 className="font-display text-xl font-bold">Withdrawal Successful</h1>
+          <p className="mt-1 font-mono text-3xl font-bold text-primary">
+            {formatGHS(receipt.amount)}
+          </p>
+        </div>
+        <dl className="space-y-3 rounded-2xl border border-border bg-card p-4 text-left text-sm">
+          <Row label="Date & time" value={formatDateTime(receipt.at)} />
+          <Row label="Reference" value={receipt.ref} mono />
+          <Row label="Remaining balance" value={formatGHS(balance)} mono />
+          <Row label="Status" value="Successful" />
+        </dl>
+        <button
+          type="button"
+          onClick={onDone}
+          className="w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground transition active:scale-[0.99]"
+        >
+          Done
+        </button>
+      </div>
+    );
+  }
+
+  if (step === "confirm") {
+    return (
+      <div className="animate-in fade-in duration-300 space-y-5">
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back
+        </button>
+        <h1 className="font-display text-2xl font-bold">Confirm Withdrawal</h1>
+        <dl className="space-y-3 rounded-2xl border border-border bg-card p-4 text-sm">
+          <Row label="Amount" value={formatGHS(value)} mono />
+          <Row label="Available balance" value={formatGHS(balance)} mono />
+          <Row label="New balance" value={formatGHS(balance - value)} mono />
+        </dl>
+        <p className="text-xs text-muted-foreground">
+          Complete this withdrawal at an authorized Student Pay POS agent.
+        </p>
+        <button
+          type="button"
+          onClick={onConfirm}
+          className="w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground transition active:scale-[0.99]"
+        >
+          Confirm Withdrawal
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="animate-in fade-in duration-300 space-y-5">
+      <h1 className="font-display text-2xl font-bold">Withdraw</h1>
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <p className="text-xs text-muted-foreground">Available balance</p>
+        <p className="mt-1 font-mono text-2xl font-bold text-primary">
+          {formatGHS(balance)}
+        </p>
+      </div>
+
+      <div>
+        <label htmlFor="amt" className="text-sm font-medium">
+          Amount (GH₵)
+        </label>
+        <input
+          id="amt"
+          inputMode="decimal"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+          placeholder="0.00"
+          className="input-field mt-2 font-mono text-lg"
+        />
+        <div className="mt-3 grid grid-cols-4 gap-2">
+          {QUICK.map((q) => (
+            <button
+              key={q}
+              type="button"
+              onClick={() => setAmount(String(q))}
+              className={`rounded-xl border py-2 text-xs font-medium transition ${
+                Number(amount) === q
+                  ? "border-primary bg-primary/15 text-primary"
+                  : "border-border bg-card text-muted-foreground hover:border-primary/50"
+              }`}
+            >
+              GH₵{q}
+            </button>
+          ))}
+        </div>
+        {value > balance && (
+          <p className="mt-2 text-xs text-destructive">Amount exceeds your balance.</p>
+        )}
+      </div>
+
+      <button
+        type="button"
+        disabled={!valid}
+        onClick={onContinue}
+        className="w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground transition active:scale-[0.99] disabled:opacity-40"
+      >
+        Continue
+      </button>
+    </div>
+  );
+}
+
+/* ---------------- Transactions ---------------- */
+
+type Filter = "All" | "Deposits" | "Withdrawals" | "Payments";
+
+function TransactionsScreen({ txs }: { txs: StudentTx[] }) {
+  const [filter, setFilter] = useState<Filter>("All");
+  const [selected, setSelected] = useState<StudentTx | null>(null);
+
+  const list = useMemo(
+    () =>
+      txs.filter((t) =>
+        filter === "All"
+          ? true
+          : filter === "Deposits"
+            ? t.type === "School Deposit"
+            : filter === "Withdrawals"
+              ? t.type === "POS Withdrawal"
+              : t.type === "Vendor Payment",
+      ),
+    [txs, filter],
+  );
+
+  return (
+    <div className="animate-in fade-in duration-300 space-y-4">
+      <h1 className="font-display text-2xl font-bold">Transactions</h1>
+      <div className="flex flex-wrap gap-2">
+        {(["All", "Deposits", "Withdrawals", "Payments"] as Filter[]).map((f) => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setFilter(f)}
+            className={`rounded-full border px-3 py-1 text-xs transition ${
+              filter === f
+                ? "border-primary bg-primary/15 text-primary"
+                : "border-border bg-card text-muted-foreground hover:border-primary/50"
+            }`}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+        {list.length === 0 && (
+          <p className="p-6 text-center text-sm text-muted-foreground">
+            No transactions
+          </p>
+        )}
+        {list.map((t) => (
+          <TxRow key={t.id} tx={t} onClick={() => setSelected(t)} />
+        ))}
+      </div>
+
+      {selected && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-4"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-t-3xl border border-border bg-card p-5 sm:rounded-3xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="font-display text-lg font-bold">{selected.type}</h2>
+            <p
+              className={`mt-1 font-mono text-2xl font-bold ${
+                selected.direction === "in" ? "text-primary" : "text-foreground"
+              }`}
+            >
+              {selected.direction === "in" ? "+" : "−"} {formatGHS(selected.amount)}
+            </p>
+            <dl className="mt-4 space-y-3 text-sm">
+              <Row label="Date" value={formatDate(selected.at)} />
+              <Row label="Time" value={formatTime(selected.at)} />
+              <Row label="Status" value={selected.status} />
+              <Row label="Reference" value={selected.ref} mono />
+              {selected.detail && <Row label="Details" value={selected.detail} />}
+            </dl>
+            <button
+              type="button"
+              onClick={() => setSelected(null)}
+              className="mt-5 w-full rounded-xl border border-border py-3 text-sm font-medium"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TxRow({ tx, onClick }: { tx: StudentTx; onClick?: () => void }) {
+  const isIn = tx.direction === "in";
   return (
     <button
-      onClick={onTap}
+      type="button"
+      onClick={onClick}
       className="flex w-full items-center gap-3 p-3.5 text-left transition hover:bg-secondary/40 sm:p-4"
     >
-      <div
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10 ${
-          isDeposit ? "bg-primary/15 text-primary" : "bg-warning/15 text-warning"
+      <span
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+          isIn ? "bg-primary/15 text-primary" : "bg-warning/15 text-warning"
         }`}
       >
-        {isDeposit ? (
+        {isIn ? (
           <ArrowDownLeft className="h-5 w-5" />
         ) : (
           <ArrowUpRight className="h-5 w-5" />
         )}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{label}</p>
-        <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
-          {tx.note ?? tx.method ?? "Student Pay"} ·{" "}
-          {new Date(tx.createdAt).toLocaleDateString("en-GH", {
-            day: "numeric",
-            month: "short",
-          })}
-        </p>
-      </div>
-      <div className="shrink-0 text-right">
-        <p
-          className={`font-mono text-[13px] font-semibold sm:text-sm ${
-            isDeposit ? "text-primary" : "text-foreground"
-          }`}
-        >
-          {isDeposit ? "+" : "−"}
-          {formatGHS(tx.amount)}
-        </p>
-        <p className="text-[10px] text-muted-foreground">
-          {isDeposit ? "Received" : "Successful"}
-        </p>
-      </div>
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium">{tx.type}</span>
+        <span className="block truncate text-[11px] text-muted-foreground">
+          {formatDate(tx.at)} · {formatTime(tx.at)} · {tx.status}
+        </span>
+      </span>
+      <span
+        className={`shrink-0 font-mono text-[13px] font-semibold ${
+          isIn ? "text-primary" : "text-foreground"
+        }`}
+      >
+        {isIn ? "+" : "−"} {formatGHS(tx.amount)}
+      </span>
     </button>
   );
 }
 
-function ProfileRow({
-  label,
-  value,
-  mono,
-  valueClass = "",
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-  valueClass?: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3 p-4">
-      <span className="shrink-0 text-xs text-muted-foreground">{label}</span>
-      <span
-        className={`min-w-0 truncate text-sm font-medium ${mono ? "font-mono" : ""} ${valueClass}`}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
+/* ---------------- My Card ---------------- */
 
-function DetailRow({
-  label,
-  value,
-  mono,
-  valueClass = "",
+function CardScreen({
+  profile,
+  frozen,
+  onToggleFreeze,
+  onBack,
 }: {
-  label: string;
-  value: string;
-  mono?: boolean;
-  valueClass?: string;
+  profile: typeof MOCK_STUDENT;
+  frozen: boolean;
+  onToggleFreeze: () => void;
+  onBack: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 p-3">
-      <span className="shrink-0 text-xs text-muted-foreground">{label}</span>
-      <span
-        className={`min-w-0 truncate text-xs font-medium ${mono ? "font-mono" : ""} ${valueClass}`}
+    <div className="animate-in fade-in duration-300 space-y-5">
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
-        {value}
-      </span>
-    </div>
-  );
-}
+        <ArrowLeft className="h-4 w-4" /> Back
+      </button>
+      <h1 className="font-display text-2xl font-bold">My Card</h1>
 
-function Modal({
-  title,
-  onClose,
-  children,
-}: {
-  title: string;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center"
-      onClick={onClose}
-    >
       <div
-        className="w-full max-w-md rounded-t-3xl border border-border bg-card p-5 shadow-card sm:rounded-3xl"
-        onClick={(e) => e.stopPropagation()}
+        className={`rounded-3xl border border-border p-5 shadow-card transition ${
+          frozen ? "bg-secondary opacity-70" : "bg-gradient-primary text-primary-foreground"
+        }`}
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-lg font-bold">{title}</h2>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-muted-foreground transition hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
+        <div className="flex items-start justify-between">
+          <span className="text-xs font-semibold uppercase tracking-wide opacity-80">
+            Student Pay
+          </span>
+          <CreditCard className="h-6 w-6 opacity-80" />
         </div>
-        {children}
+        <p className="mt-8 font-mono text-lg tracking-widest">{profile.cardNumber}</p>
+        <div className="mt-5 flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold">{profile.name}</p>
+            <p className="truncate font-mono text-[11px] opacity-80">
+              {profile.studentId}
+            </p>
+          </div>
+          <div className="text-right text-[11px] opacity-80">
+            <p>Valid thru</p>
+            <p className="font-mono">{profile.cardExpiry}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-3 rounded-2xl border border-border bg-card p-4 text-sm">
+        <Row label="Card status" value={frozen ? "Frozen" : "Active"} />
+        <Row label="Student ID" value={profile.studentId} mono />
+        <Row label="Expiry" value={profile.cardExpiry} mono />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={onToggleFreeze}
+          className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 text-sm font-medium"
+        >
+          <Snowflake className="h-4 w-4 text-primary" />
+          {frozen ? "Unfreeze Card" : "Freeze Card"}
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            toast("Full card details are only shown at a verified Student Pay desk.")
+          }
+          className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 text-sm font-medium"
+        >
+          <Lock className="h-4 w-4 text-primary" /> Card Details
+        </button>
       </div>
     </div>
+  );
+}
+
+/* ---------------- Profile ---------------- */
+
+function ProfileScreen({ profile }: { profile: typeof MOCK_STUDENT }) {
+  const initials = profile.name
+    .split(" ")
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("");
+
+  return (
+    <div className="animate-in fade-in duration-300 space-y-5">
+      <h1 className="font-display text-2xl font-bold">Profile</h1>
+
+      <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-primary font-display text-lg font-bold text-primary-foreground">
+          {initials}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate font-semibold">{profile.name}</p>
+          <p className="truncate font-mono text-xs text-muted-foreground">
+            {profile.studentId}
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-3 rounded-2xl border border-border bg-card p-4 text-sm">
+        <Row label="School" value={profile.school} />
+        <Row label="Programme" value={profile.programme} />
+        <Row label="Phone" value={profile.phone} />
+        <Row label="Email" value={profile.email} />
+      </div>
+
+      <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+        <ActionRow icon={KeyRound} label="Change PIN" />
+        <ActionRow icon={Bell} label="Notification settings" />
+        <ActionRow icon={Lock} label="Security settings" />
+      </div>
+
+      <button
+        type="button"
+        onClick={async () => {
+          await signOut();
+          toast.success("Signed out");
+        }}
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-destructive/40 py-3 text-sm font-medium text-destructive"
+      >
+        <LogOut className="h-4 w-4" /> Logout
+      </button>
+    </div>
+  );
+}
+
+function ActionRow({
+  icon: Icon,
+  label,
+}: {
+  icon: typeof Bell;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => toast("Coming soon")}
+      className="flex w-full items-center gap-3 p-4 text-left text-sm transition hover:bg-secondary/40"
+    >
+      <Icon className="h-4 w-4 shrink-0 text-primary" />
+      <span className="flex-1">{label}</span>
+      <span className="text-muted-foreground">›</span>
+    </button>
+  );
+}
+
+/* ---------------- Shared ---------------- */
+
+function Row({
+  label,
+  value,
+  mono,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <dt className="shrink-0 text-muted-foreground">{label}</dt>
+      <dd className={`min-w-0 text-right font-medium ${mono ? "font-mono" : ""}`}>
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+const NAV = [
+  { id: "home", label: "Home", icon: Home },
+  { id: "withdraw", label: "Withdraw", icon: Wallet },
+  { id: "transactions", label: "Transactions", icon: Receipt },
+  { id: "profile", label: "Profile", icon: User },
+] as const;
+
+function StudentNav({
+  tab,
+  onChange,
+}: {
+  tab: Tab;
+  onChange: (t: Tab) => void;
+}) {
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+      <div className="mx-auto flex max-w-md items-stretch justify-between gap-1 px-2 py-2 sm:px-4">
+        {NAV.map(({ id, label, icon: Icon }) => {
+          const active = tab === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onChange(id)}
+              className={`flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl py-1.5 text-[10px] font-medium transition-colors ${
+                active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Icon className="h-5 w-5 shrink-0" />
+              <span className="w-full truncate text-center">{label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
