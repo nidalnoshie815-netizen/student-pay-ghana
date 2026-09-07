@@ -88,17 +88,17 @@ function Landing() {
         <section id="features" className="relative border-t border-border py-10 sm:py-16">
           <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
             <Feature
-              icon={<Wallet className="h-5 w-5" />}
+              icon={<Wallet className="h-6 w-6" />}
               title="Parent top-ups"
               text="Fund your child's wallet from any Ghanaian mobile money account in seconds."
             />
             <Feature
-              icon={<Users className="h-5 w-5" />}
+              icon={<Users className="h-6 w-6" />}
               title="Student ID withdrawal"
               text="Students cash out using a unique secure ID — no card, no hassle."
             />
             <Feature
-              icon={<ShieldCheck className="h-5 w-5" />}
+              icon={<ShieldCheck className="h-6 w-6" />}
               title="Live notifications"
               text="Parents see every withdrawal the moment it happens. Full transparency."
             />
@@ -107,7 +107,7 @@ function Landing() {
 
         {/* HOW */}
         <section id="how" className="relative border-t border-border py-10 sm:py-16">
-          <h2 className="text-center font-display text-2xl font-bold sm:text-3xl">How it works</h2>
+          <h2 className="text-center font-display text-[clamp(1.5rem,5vw,2.25rem)] font-bold sm:text-3xl md:text-4xl">How it works</h2>
           <ol className="mt-6 grid gap-3 sm:mt-8 sm:gap-4 md:grid-cols-3">
             {[
               ["01", "Get a Student ID", "Each student receives a unique secure ID code."],
@@ -115,9 +115,9 @@ function Landing() {
               ["03", "Student withdraws", "Use the ID to withdraw — parent gets notified."],
             ].map(([n, t, d]) => (
               <li key={n} className="rounded-2xl border border-border bg-card/80 p-5 backdrop-blur-sm sm:p-6">
-                <div className="font-mono text-xs text-primary">{n}</div>
-                <div className="mt-2 font-display text-lg font-semibold">{t}</div>
-                <div className="mt-1 text-sm text-muted-foreground">{d}</div>
+                <div className="font-mono text-sm text-primary sm:text-base">{n}</div>
+                <div className="mt-2 font-display text-xl font-semibold sm:text-2xl">{t}</div>
+                <div className="mt-1 text-base leading-relaxed text-muted-foreground sm:text-lg">{d}</div>
               </li>
             ))}
           </ol>
