@@ -25,9 +25,9 @@ export const Route = createFileRoute("/")({
 function Landing() {
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Faint full-page background */}
+      {/* Full-page background */}
       <div
-        className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center bg-no-repeat opacity-[0.10]"
+        className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center bg-no-repeat opacity-50"
         style={{ backgroundImage: `url(${studentsBg})` }}
         aria-hidden="true"
       />
