@@ -27,11 +27,11 @@ function Landing() {
     <div className="relative min-h-screen overflow-hidden">
       {/* Faint full-page background */}
       <div
-        className="pointer-events-none absolute inset-0 -z-20 bg-cover bg-center bg-no-repeat opacity-[0.08]"
+        className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center bg-no-repeat opacity-[0.10]"
         style={{ backgroundImage: `url(${studentsBg})` }}
         aria-hidden="true"
       />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-background via-background/95 to-background/90" aria-hidden="true" />
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-b from-background/75 via-background/55 to-background/75" aria-hidden="true" />
 
       {/* Soft ambient glows */}
       <div className="pointer-events-none absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-[120px]" aria-hidden="true" />
