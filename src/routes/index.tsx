@@ -134,11 +134,11 @@ function Landing() {
 function Feature({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
     <div className="rounded-2xl border border-border bg-card/80 p-5 backdrop-blur-sm transition hover:border-primary/50 sm:p-6">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
+      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/15 text-primary">
         {icon}
       </div>
-      <div className="mt-4 font-display text-lg font-semibold">{title}</div>
-      <div className="mt-1 text-sm text-muted-foreground">{text}</div>
+      <div className="mt-4 font-display text-xl font-semibold sm:text-2xl">{title}</div>
+      <div className="mt-1 text-base leading-relaxed text-muted-foreground sm:text-lg">{text}</div>
     </div>
   );
 }
