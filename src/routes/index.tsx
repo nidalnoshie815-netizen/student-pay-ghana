@@ -54,32 +54,32 @@ function Landing() {
       <main className="relative mx-auto max-w-6xl px-4 sm:px-6">
         {/* HERO */}
         <section className="flex flex-col items-center justify-center py-12 text-center sm:py-20 md:py-28">
-          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-medium text-primary sm:text-xs">
-            <Sparkles className="h-3 w-3 shrink-0" /> AI-powered student wallet
+          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary sm:text-sm">
+            <Sparkles className="h-3.5 w-3.5 shrink-0" /> AI-powered student wallet
           </span>
-          <h1 className="mt-5 max-w-3xl text-balance font-display text-[2.25rem] font-bold leading-[1.1] sm:text-5xl md:text-6xl">
+          <h1 className="mt-6 max-w-3xl text-balance font-display text-[clamp(2rem,7vw,3.75rem)] font-bold leading-[1.05] sm:text-5xl md:text-6xl">
             Send pocket money.{" "}
             <span className="text-primary">Skip the worry.</span>
           </h1>
-          <p className="mt-5 max-w-xl text-balance text-sm text-muted-foreground sm:text-base">
+          <p className="mt-6 max-w-xl text-balance text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
             Support your child's education with seamless mobile money payments for fees,
             meals and daily needs. Students access funds securely with their Student ID — all in Ghana Cedis.
           </p>
-          <div className="mt-8 flex w-full flex-wrap justify-center gap-3">
+          <div className="mt-9 flex w-full flex-wrap justify-center gap-3">
             <Link
               to="/guardian/auth"
-              className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-primary px-6 py-3 font-semibold text-primary-foreground shadow-glow transition hover:scale-105 sm:w-auto"
+              className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-primary px-7 py-3.5 text-base font-semibold text-primary-foreground shadow-glow transition hover:scale-105 sm:w-auto"
             >
-              I'm a Parent <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+              I'm a Parent <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
             </Link>
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs text-muted-foreground sm:mt-12">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-muted-foreground sm:mt-14 sm:text-base">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> Bank-grade security
+              <ShieldCheck className="h-5 w-5 shrink-0 text-primary" /> Bank-grade security
             </div>
             <div className="flex items-center gap-2">
-              <Smartphone className="h-4 w-4 shrink-0 text-primary" /> Mobile money native
+              <Smartphone className="h-5 w-5 shrink-0 text-primary" /> Mobile money native
             </div>
           </div>
         </section>
