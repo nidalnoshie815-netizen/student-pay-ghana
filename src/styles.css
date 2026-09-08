@@ -93,6 +93,7 @@
   }
   html {
     -webkit-text-size-adjust: 100%;
+    font-size: 16px;
   }
   body {
     background: var(--gradient-dark);
@@ -101,10 +102,50 @@
     color: var(--color-foreground);
     font-family: var(--font-display);
     min-height: 100vh;
+    line-height: 1.55;
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
+    line-height: 1.15;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+  p, label, a, button, input, textarea, select, span {
+    max-width: 100%;
+  }
+  p, label, a, button {
+    overflow-wrap: anywhere;
+  }
+  button, input, textarea, select {
+    font-size: 1rem;
+  }
+
+  @media (max-width: 639px) {
+    .text-xs {
+      font-size: 0.875rem;
+      line-height: 1.35rem;
+    }
+    .text-sm {
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+    .text-base {
+      font-size: 1.0625rem;
+      line-height: 1.65rem;
+    }
+    [class*="text-[9px]"],
+    [class*="text-[10px]"],
+    [class*="text-[11px]"],
+    [class*="text-[12px]"] {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+    .text-4xl, .text-5xl, .text-6xl, .text-7xl {
+      font-size: 2.25rem;
+      line-height: 1.12;
+    }
   }
 }
 
