@@ -4,10 +4,12 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
+import studentsBg from "@/assets/ghanaian-students.jpg";
 
 import appCss from "../styles.css?url";
 
@@ -111,6 +113,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const showInnerPageBackground = pathname !== "/";
   // Hydrate the guardian session cache from Supabase on mount and keep it
   // in sync with sign-in / sign-out events across the app.
   if (typeof window !== "undefined") {
@@ -120,8 +124,19 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <div className="relative isolate min-h-screen">
+        {showInnerPageBackground && (
+          <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden="true">
+            <div
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50"
+              style={{ backgroundImage: `url(${studentsBg})` }}
+            />
+            <div className="absolute inset-0 bg-background/65" />
+          </div>
+        )}
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </div>
       <Toaster theme="dark" position="top-right" richColors />
     </QueryClientProvider>
   );
