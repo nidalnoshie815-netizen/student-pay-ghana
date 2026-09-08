@@ -93,7 +93,7 @@
   }
   html {
     -webkit-text-size-adjust: 100%;
-    font-size: 16px;
+    font-size: clamp(15px, 0.9rem + 0.35vw, 18px);
   }
   body {
     background: var(--gradient-dark);

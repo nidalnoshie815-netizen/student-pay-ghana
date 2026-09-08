@@ -114,7 +114,7 @@ function StudentApp() {
 
   return (
     <div className="relative min-h-screen pb-28">
-      <header className="mx-auto flex max-w-md items-center justify-between gap-3 px-4 pt-6 sm:px-5">
+      <header className="mx-auto flex w-full max-w-md sm:max-w-lg lg:max-w-2xl items-center justify-between gap-3 px-4 pt-6 sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
           <Logo className="h-8 w-8 shrink-0" />
           <div className="min-w-0">
@@ -137,7 +137,7 @@ function StudentApp() {
         </button>
       </header>
 
-      <main className="mx-auto max-w-md px-4 pt-5 sm:px-5">
+      <main className="mx-auto w-full max-w-md sm:max-w-lg lg:max-w-2xl px-4 pt-5 sm:px-5">
         {showCard ? (
           <CardScreen
             profile={profile}
@@ -729,7 +729,7 @@ function StudentNav({
 }) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto flex max-w-md items-stretch justify-between gap-1 px-2 py-2 sm:px-4">
+      <div className="mx-auto flex w-full max-w-md sm:max-w-lg lg:max-w-2xl items-stretch justify-between gap-1 px-2 py-2 sm:px-4">
         {NAV.map(({ id, label, icon: Icon }) => {
           const active = tab === id;
           return (
