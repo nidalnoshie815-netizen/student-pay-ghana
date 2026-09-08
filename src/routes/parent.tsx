@@ -61,7 +61,7 @@ function ParentDashboard() {
         <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-accent/20 blur-3xl" />
       </div>
 
-      <header className="mx-auto flex max-w-md items-center justify-between gap-3 px-4 py-4 sm:px-5 sm:py-5">
+      <header className="mx-auto flex w-full max-w-md sm:max-w-lg lg:max-w-2xl items-center justify-between gap-3 px-4 py-4 sm:px-5 sm:py-5">
         <Logo />
         <div className="flex items-center gap-2">
           <Link to="/guardian/profile" className="group min-w-0 text-right text-[11px]">
