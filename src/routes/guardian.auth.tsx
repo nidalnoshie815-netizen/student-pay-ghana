@@ -333,7 +333,7 @@ function GuardianAuth() {
 
           <div className="my-5 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">or</span>
+            <span className="text-sm uppercase text-muted-foreground">or</span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
