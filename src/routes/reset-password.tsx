@@ -59,7 +59,7 @@ function ResetPasswordPage() {
         </Link>
       </header>
 
-      <main className="mx-auto max-w-md px-6 pb-16">
+      <main className="mx-auto w-full max-w-md sm:max-w-lg lg:max-w-2xl px-6 pb-16">
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
           <div className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15 text-primary">

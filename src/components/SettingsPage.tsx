@@ -29,7 +29,7 @@ export function SettingsPageShell({
         </Link>
       </header>
 
-      <main className="mx-auto max-w-md px-4 sm:px-5">
+      <main className="mx-auto w-full max-w-md sm:max-w-lg lg:max-w-2xl px-4 sm:px-5">
         <h1 className="font-display text-2xl font-bold">{title}</h1>
         {subtitle ? (
           <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>

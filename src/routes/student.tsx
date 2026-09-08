@@ -137,7 +137,7 @@ function StudentApp() {
         </button>
       </header>
 
-      <main className="mx-auto max-w-md px-4 pt-5 sm:px-5">
+      <main className="mx-auto w-full max-w-md sm:max-w-lg lg:max-w-2xl px-4 pt-5 sm:px-5">
         {showCard ? (
           <CardScreen
             profile={profile}

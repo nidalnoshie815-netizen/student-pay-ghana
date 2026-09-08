@@ -82,7 +82,7 @@ function ParentDashboard() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-md px-4 sm:px-5">
+      <main className="mx-auto w-full max-w-md sm:max-w-lg lg:max-w-2xl px-4 sm:px-5">
         {/* Balance card */}
         <section className="rounded-3xl bg-gradient-primary p-5 text-primary-foreground shadow-glow">
           <div className="text-xs opacity-80">Wallet balance</div>
