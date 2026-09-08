@@ -135,6 +135,13 @@
       font-size: 1.0625rem;
       line-height: 1.65rem;
     }
+    [class*="text-[9px]"],
+    [class*="text-[10px]"],
+    [class*="text-[11px]"],
+    [class*="text-[12px]"] {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
     .text-4xl, .text-5xl, .text-6xl, .text-7xl {
       font-size: 2.25rem;
       line-height: 1.12;
