@@ -61,36 +61,49 @@ function ParentDashboard() {
         <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-accent/20 blur-3xl" />
       </div>
 
-      <header className="mx-auto flex w-full max-w-md sm:max-w-lg lg:max-w-2xl items-center justify-between gap-3 px-4 py-4 sm:px-5 sm:py-5">
+      <header className="mx-auto grid w-full max-w-md grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-4 sm:max-w-lg sm:px-5 sm:py-5 lg:max-w-2xl">
         <Logo />
-        <div className="flex items-center gap-2">
-          <Link to="/guardian/profile" className="group min-w-0 text-right text-[11px]">
-            <div className="truncate font-medium text-foreground group-hover:text-primary">
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            to="/guardian/profile"
+            className="group flex min-w-0 items-center gap-2 rounded-full border border-border bg-card px-2.5 py-1.5"
+          >
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-gradient-primary text-[11px] font-bold text-primary-foreground">
+              {guardian.fullName.trim().charAt(0).toUpperCase()}
+            </span>
+            <span className="hidden max-w-[9rem] truncate text-xs font-medium text-foreground group-hover:text-primary sm:block">
               {guardian.fullName.split(" ")[0]}
-            </div>
-            <div className="text-muted-foreground">Guardian</div>
+            </span>
           </Link>
           <button
             onClick={() => {
               signOut();
               navigate({ to: "/" });
             }}
-            className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-foreground"
+            aria-label="Sign out"
+            className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-card px-2.5 py-2 text-xs text-muted-foreground hover:border-primary hover:text-foreground"
           >
             <LogOut className="h-3.5 w-3.5" />
           </button>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-md sm:max-w-lg lg:max-w-2xl px-4 sm:px-5">
+      <main className="mx-auto w-full max-w-md px-4 sm:max-w-lg sm:px-5 lg:max-w-2xl">
+        <p className="mb-3 text-sm text-muted-foreground">
+          Welcome back,{" "}
+          <span className="font-semibold text-foreground">
+            {guardian.fullName.split(" ")[0]}
+          </span>
+        </p>
+
         {/* Balance card */}
-        <section className="rounded-3xl bg-gradient-primary p-5 text-primary-foreground shadow-glow">
+        <section className="rounded-3xl bg-gradient-primary p-5 text-primary-foreground shadow-glow sm:p-6">
           <div className="text-xs opacity-80">Wallet balance</div>
-          <div className="mt-1 font-display text-[1.75rem] font-bold sm:text-3xl">
+          <div className="mt-1 font-display text-[clamp(1.75rem,8vw,2.5rem)] font-bold leading-tight">
             {formatGHS(account.balance)}
           </div>
-          <div className="mt-3 flex items-center justify-between gap-3 text-xs">
-            <div>
+          <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 text-xs">
+            <div className="min-w-0">
               <div className="opacity-70">Student</div>
               <div className="truncate font-semibold">{account.studentName}</div>
             </div>
