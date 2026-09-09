@@ -75,11 +75,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "StudentPay — Student wallet for Ghana" },
+      {
+        name: "description",
+        content:
+          "Guardians top up, students withdraw with their Student ID. Mobile money payments in Ghana Cedis.",
+      },
+      { name: "author", content: "StudentPay" },
+      { property: "og:title", content: "StudentPay — Student wallet for Ghana" },
+      {
+        property: "og:description",
+        content: "Fund, track and withdraw student allowances securely in Ghana Cedis.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const SYSTEM_PROMPT = `You are the StudentPay Help Assistant — a friendly, concise support agent for a Ghanaian student wallet app used by parents/guardians.
 
@@ -23,6 +24,7 @@ const MessageSchema = z.object({
 });
 
 export const askHelpAI = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(
     z.object({
       messages: z.array(MessageSchema).min(1).max(20),

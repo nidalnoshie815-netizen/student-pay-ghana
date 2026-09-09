@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const PAYSTACK_BASE = "https://api.paystack.co";
 
@@ -13,13 +14,16 @@ const initInput = z.object({
 });
 
 export const initializePaystack = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(initInput)
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const key = process.env.PAYSTACK_SECRET_KEY;
     if (!key) throw new Error("PAYSTACK_SECRET_KEY is not configured");
 
+    const email = (context.claims.email as string | undefined) || data.email;
+
     const body = {
-      email: data.email,
+      email,
       amount: Math.round(data.amount * 100), // pesewas
       currency: "GHS",
       callback_url: data.callbackUrl,
@@ -51,6 +55,7 @@ export const initializePaystack = createServerFn({ method: "POST" })
   });
 
 export const verifyPaystack = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ reference: z.string().min(3) }))
   .handler(async ({ data }) => {
     const key = process.env.PAYSTACK_SECRET_KEY;
